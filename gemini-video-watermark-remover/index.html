@@ -227,6 +227,11 @@
             <button id="brushApply" class="tool primary-tool" data-i18n="brush.apply" disabled>✨ Erase</button>
             <button id="brushDone" class="tool" data-i18n="brush.done">Done</button>
           </div>
+          <div id="maskBar" class="toolbar-row" hidden>
+            <span id="maskHint" class="hint"></span>
+            <label class="size"><span data-i18n="brush.size">Size</span> <input id="maskSize" type="range" min="4" max="120" value="24" /></label>
+            <button id="maskDone" class="tool primary-tool" data-i18n="brush.done">Done</button>
+          </div>
           <div id="cropBar" class="toolbar-row" hidden>
             <div class="seg" role="group" aria-label="Crop ratio">
               <button data-ratio="free" class="active" data-i18n="crop.free">Free</button><button data-ratio="1">1:1</button><button data-ratio="0.8">4:5</button><button data-ratio="1.7778">16:9</button><button data-ratio="0.5625">9:16</button>
@@ -297,6 +302,11 @@
                 <button data-bg="white" class="swatch sw-white" title="White"></button>
                 <button data-bg="blur" class="swatch sw-blur" title="Blurred original">Blur</button>
                 <label class="swatch sw-color" title="Any colour"><input id="bgColor" type="color" value="#6d5dfc" /></label>
+              </div>
+              <span class="hint" data-i18n="bg.touchUp">Fix the cut-out:</span>
+              <div class="touch">
+                <button data-touch="keep" class="tool touch-keep" data-i18n="bg.keep">🟢 Keep</button>
+                <button data-touch="cut" class="tool touch-cut" data-i18n="bg.cut">🔴 Remove</button>
               </div>
             </div>
           </div>

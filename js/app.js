@@ -23,6 +23,7 @@
     saveBackBtn: $('saveBackBtn'), toast: $('toast'),
     bgRemoveBtn: $('bgRemoveBtn'), bgOptions: $('bgOptions'), bgColor: $('bgColor'), bgEngine: $('bgEngine'),
     sizePreset: $('sizePreset'), sizeLimit: $('sizeLimit'), fitRow: $('fitRow'),
+    maskBar: $('maskBar'), maskHint: $('maskHint'), maskSize: $('maskSize'), maskDone: $('maskDone'),
   };
   const FOUR_K = 3840;
   // Phones and low-memory devices get smaller limits so the tab doesn't crash.
@@ -1129,6 +1130,10 @@
     state.mode = mode;
     el.compare.classList.toggle('brush', mode === 'brush');
     el.compare.classList.toggle('crop', mode === 'crop');
+    el.compare.classList.toggle('mask', mode === 'mask');
+    el.maskBar.hidden = mode !== 'mask';
+    document.querySelectorAll('[data-touch]').forEach((b) => b.classList.toggle('on', mode === 'mask' && b.dataset.touch === touchTool));
+    if (mode === 'mask') el.maskHint.textContent = tr(touchTool === 'keep' ? 'bg.keepHint' : 'bg.cutHint');
     el.brushBar.hidden = mode !== 'brush';
     el.cropBar.hidden = mode !== 'crop';
     el.cropBox.hidden = mode !== 'crop';
@@ -1185,19 +1190,19 @@
     const r = el.compare.getBoundingClientRect();
     const k = state.clean.width / r.width; // image px per screen px
     return {
-      x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k, rad: (+el.brushSize.value / 2) * k,
+      x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k, rad: (+(state.mode === 'mask' ? el.maskSize : el.brushSize).value / 2) * k,
       sx: e.clientX - r.left, sy: e.clientY - r.top,
     };
   }
   function moveCursor(p) {
-    const size = +el.brushSize.value;
+    const size = +(state.mode === 'mask' ? el.maskSize : el.brushSize).value;
     Object.assign(el.brushCursor.style, { left: p.sx + 'px', top: p.sy + 'px', width: size + 'px', height: size + 'px' });
     el.brushCursor.hidden = false;
   }
   let lastPaint = null;
   function paintTo(p) {
     const ctx = el.paint.getContext('2d');
-    ctx.strokeStyle = ctx.fillStyle = '#ff2d55';
+    ctx.strokeStyle = ctx.fillStyle = state.mode === 'mask' && touchTool === 'keep' ? '#22c55e' : '#ff2d55';
     ctx.lineCap = ctx.lineJoin = 'round';
     ctx.lineWidth = p.rad * 2;
     ctx.beginPath();
@@ -1207,7 +1212,7 @@
     if (!state.painted) { state.painted = true; refresh(); }
   }
   el.compare.addEventListener('pointerdown', (e) => {
-    if (state.mode !== 'brush' || state.busy) return;
+    if ((state.mode !== 'brush' && state.mode !== 'mask') || state.busy) return;
     el.compare.setPointerCapture(e.pointerId);
     lastPaint = null;
     const p = brushPoint(e);
@@ -1215,13 +1220,53 @@
     paintTo(p);
   });
   el.compare.addEventListener('pointermove', (e) => {
-    if (state.mode !== 'brush') return;
+    if (state.mode !== 'brush' && state.mode !== 'mask') return;
     const p = brushPoint(e);
     moveCursor(p);
     if (lastPaint) paintTo(p);
   });
-  ['pointerup', 'pointercancel'].forEach((t) => el.compare.addEventListener(t, () => { lastPaint = null; }));
-  el.compare.addEventListener('pointerleave', () => { if (state.mode === 'brush' && !lastPaint) el.brushCursor.hidden = true; });
+  ['pointerup', 'pointercancel'].forEach((t) => el.compare.addEventListener(t, () => {
+    const wasPainting = !!lastPaint;
+    lastPaint = null;
+    if (wasPainting && state.mode === 'mask') applyTouch();
+  }));
+  el.compare.addEventListener('pointerleave', () => { if ((state.mode === 'brush' || state.mode === 'mask') && !lastPaint) el.brushCursor.hidden = true; });
+
+  // ---------- background touch-up: paint to keep or remove parts of the cut-out ----------
+
+  var touchTool = 'keep'; // var: setMode() reads it and may run first
+  document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () => {
+    if (!state.bg || state.busy) return;
+    touchTool = b.dataset.touch;
+    clearPaint();
+    setMode('mask');
+  }));
+  el.maskDone.addEventListener('click', () => { clearPaint(); setMode('compare'); });
+
+  // Burn the painted stroke into a copy of the mask (so Undo can go back), then recompose.
+  function applyTouch() {
+    if (!state.bg || !state.painted) return;
+    const W = state.bg.mask.width, H = state.bg.mask.height;
+    const mask = document.createElement('canvas');
+    mask.width = W; mask.height = H;
+    const m = mask.getContext('2d', { willReadFrequently: true });
+    m.drawImage(state.bg.mask, 0, 0);
+    const md = m.getImageData(0, 0, W, H);
+    const pd = el.paint.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+    const keep = touchTool === 'keep';
+    for (let i = 3; i < pd.length; i += 4) {
+      const a = pd[i];
+      if (a < 8) continue;
+      // soft brush edge: blend towards fully kept / fully removed
+      md.data[i - 3] = md.data[i - 2] = md.data[i - 1] = 255;
+      md.data[i] = keep ? Math.max(md.data[i], a) : Math.min(md.data[i], 255 - a);
+    }
+    m.putImageData(md, 0, 0);
+    pushHistory();
+    state.bg = Object.assign({}, state.bg, { mask });
+    clearPaint();
+    applyBg();
+  }
 
   function showWorking(title, sub) {
     ov.box.hidden = false;

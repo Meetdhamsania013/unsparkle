@@ -124,7 +124,9 @@
     }
     let largest = 0;
     for (const c of comps) if (c.solid && c.area > largest) largest = c.area;
-    const holeMax = n * 0.002, speckMax = largest * 0.01;
+    // holes are judged against the subject's size: gaps inside an object get
+    // filled, big real openings (like the inside of a bag handle) stay clear
+    const holeMax = Math.max(n * 0.002, largest * 0.025), speckMax = largest * 0.01;
     for (let i = 0; i < n; i++) {
       const c = comps[label[i]];
       if (!c.solid && !c.border && c.area < holeMax) px[i * 4 + 3] = 255;   // small enclosed hole → fill
