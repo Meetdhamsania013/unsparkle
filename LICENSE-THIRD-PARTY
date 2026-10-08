@@ -96,3 +96,8 @@ Source: https://github.com/microsoft/onnxruntime - MIT License, Copyright (c) Mi
 
 === Fonts (assets/fonts) ===
 Inter and Space Grotesk - SIL Open Font License 1.1, see assets/fonts/OFL-*.txt
+
+
+=== ormbg background-removal model (js/models/ormbg-fp16.onnx, unmodified fp16 ONNX export) ===
+Source: https://huggingface.co/schirrmacher/ormbg (ONNX: https://huggingface.co/onnx-community/ormbg-ONNX)
+License: Apache License 2.0, full text in js/models/APACHE-2.0.txt

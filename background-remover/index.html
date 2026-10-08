@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!--seo:base--><base href="../" /><!--/seo:base-->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!--seo:head-->
+  <title>Free AI Background Remover – Transparent PNG in Seconds | Unsparkle</title>
+  <meta name="description" content="Remove the background from any photo with AI, free and private. Get a transparent PNG or put your subject on white, a colour or a blurred background. No sign-up, no upload." />
+  <meta name="theme-color" content="#0b0d17" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+
+  <!-- search engines and share previews (WhatsApp, X, LinkedIn, Facebook) -->
+  <link rel="canonical" href="https://meetdhamsania013.github.io/unsparkle/background-remover/" />
+  <meta property="og:url" content="https://meetdhamsania013.github.io/unsparkle/background-remover/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Unsparkle" />
+  <meta property="og:title" content="Free AI Background Remover – Transparent PNG in Seconds | Unsparkle" />
+  <meta property="og:description" content="Remove the background from any photo with AI, free and private. Get a transparent PNG or put your subject on white, a colour or a blurred background. No sign-up, no upload." />
+  <meta property="og:image" content="https://meetdhamsania013.github.io/unsparkle/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free AI Background Remover – Transparent PNG in Seconds | Unsparkle" />
+  <meta name="twitter:description" content="Remove the background from any photo with AI, free and private. Get a transparent PNG or put your subject on white, a colour or a blurred background. No sign-up, no upload." />
+  <meta name="twitter:image" content="https://meetdhamsania013.github.io/unsparkle/assets/og-image.png" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Unsparkle","url":"https://meetdhamsania013.github.io/unsparkle/background-remover/","applicationCategory":"MultimediaApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"description":"Remove the background from any photo with AI, free and private. Get a transparent PNG or put your subject on white, a colour or a blurred background. No sign-up, no upload.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"HowTo","name":"How to remove the background from a photo","step":[{"@type":"HowToStep","position":1,"name":"Drop your photo","text":"Drop a photo on the box above. People, products, animals and objects all work best when the subject is clear."},{"@type":"HowToStep","position":2,"name":"Press ✂ Remove background","text":"In the editor, press ✂ Remove background. The first time, the AI model (about 88 MB) is downloaded once and then remembered by your browser."},{"@type":"HowToStep","position":3,"name":"Choose a background and save","text":"Keep it transparent or pick white, any colour or a blurred version of the original, then download as PNG or WebP."}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is the background remover free?","acceptedAnswer":{"@type":"Answer","text":"Yes, completely free with no account and no limits."}},{"@type":"Question","name":"Are my photos uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. The AI runs in your browser, so your photos stay on your device."}},{"@type":"Question","name":"Which format keeps the transparent background?","acceptedAnswer":{"@type":"Answer","text":"PNG and WebP keep transparency. JPG cannot be transparent, so it gets a white background."}},{"@type":"Question","name":"Can I make it the right size for Instagram or a shop?","acceptedAnswer":{"@type":"Answer","text":"Yes. In “Save as” choose a size such as Instagram post or story and a maximum file size, and it is applied when you download."}},{"@type":"Question","name":"How fast is it?","acceptedAnswer":{"@type":"Answer","text":"A few seconds on most computers with a graphics card, up to about half a minute on slower devices."}}]}]}</script>
+  <!--/seo:head-->
+
+  <!-- Privacy lock: the page may only load its own files plus the AI engine code from jsDelivr,
+       and can't send data anywhere else. Images can't leave the device even if the code had a bug. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob: https://cdn.jsdelivr.net 'wasm-unsafe-eval'; connect-src 'self' https://cdn.jsdelivr.net https://meetdhamsania013.github.io; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-focus="bg">
+  <div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><canvas id="magic"></canvas></div>
+
+  <header class="nav">
+    <a class="brand" href="./">
+      <img src="assets/logo.svg" alt="" width="34" height="34" />
+      <span>Unsparkle</span>
+    </a>
+    <div class="nav-right">
+      <button id="installBtn" class="chip chip-link" data-i18n="nav.install" hidden>⬇ Install app</button>
+      <button class="chip chip-link" data-info="privacy" data-i18n="nav.private">🔒 Private</button>
+      <a class="chip chip-link" href="#" target="_blank" rel="noopener" id="repoLink" data-i18n="nav.os">★ Open source</a>
+      <button id="themeBtn" class="chip chip-link" title="Theme">◐ Auto</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- landing -->
+    <section id="landing" class="landing">
+      <div class="hero">
+        <div class="eyebrow" data-i18n="hero.eyebrow">Free · No sign-up · Runs on your device</div>
+        <!--seo:hero-->
+        <h1>Remove the background<br /><span class="grad">in one click.</span></h1>
+        <p class="lead">Drop a photo, then press ✂ Remove background in the editor. Keep it transparent, or choose white, any colour or a soft blur: perfect for products, profile pictures and stickers.</p>
+        <!--/seo:hero-->
+      </div>
+
+      <label id="dropzone" class="drop">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime" multiple hidden />
+        <div class="drop-art" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="56" height="56"><path d="M32 4C33 25 39 31 60 32C39 33 33 39 32 60C31 39 25 33 4 32C25 31 31 25 32 4Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="4 3"/></svg>
+        </div>
+        <div class="drop-title" data-i18n="drop.title">Drop your images here</div>
+        <div class="drop-sub" data-i18n-html="drop.sub">one or many · or <u>browse</u> · paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> · PNG, JPG, WebP</div>
+      </label>
+
+      <div id="blocked" class="blocked" role="alert" hidden>
+        <div class="blocked-ico">⛔</div>
+        <div>
+          <h3 data-i18n="blocked.title">We can't process this image</h3>
+          <p id="blockedMsg"></p>
+          <p class="hint" data-i18n="blocked.hint"></p>
+        </div>
+      </div>
+
+      <p class="notice">
+        <span data-i18n-html="notice"></span>
+        <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> · <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button>
+      </p>
+
+      <div class="features">
+        <div class="feature"><div class="f-ico">◎</div><h3 data-i18n="feat1.t">Finds every logo</h3><p data-i18n="feat1.p">Scans every size and position, catches a second logo left over from an earlier edit, and cleans every frame of a video.</p></div>
+        <div class="feature"><div class="f-ico">◐</div><h3 data-i18n="feat2.t">Restores the real pixels</h3><p data-i18n="feat2.p">Reverses the overlay mathematically, then blends any leftovers into the background around them.</p></div>
+        <div class="feature"><div class="f-ico">⤢</div><h3 data-i18n="feat3.t">AI upscale to 4K</h3><p data-i18n="feat3.p">Real-ESRGAN running in your browser adds real sharpness instead of blur.</p></div>
+      </div>
+
+      <!--seo:content-->
+<section class="seo" aria-labelledby="howto-title">
+        <h2 id="howto-title">How to remove the background from a photo</h2>
+        <ol class="howto">
+          <li><b>Drop your photo</b><span>Drop a photo on the box above. People, products, animals and objects all work best when the subject is clear.</span></li>
+          <li><b>Press ✂ Remove background</b><span>In the editor, press ✂ Remove background. The first time, the AI model (about 88 MB) is downloaded once and then remembered by your browser.</span></li>
+          <li><b>Choose a background and save</b><span>Keep it transparent or pick white, any colour or a blurred version of the original, then download as PNG or WebP.</span></li>
+        </ol>
+        <h2>Frequently asked questions</h2>
+        <div class="faq">
+          <details><summary>Is the background remover free?</summary><p>Yes, completely free with no account and no limits.</p></details>
+          <details><summary>Are my photos uploaded?</summary><p>No. The AI runs in your browser, so your photos stay on your device.</p></details>
+          <details><summary>Which format keeps the transparent background?</summary><p>PNG and WebP keep transparency. JPG cannot be transparent, so it gets a white background.</p></details>
+          <details><summary>Can I make it the right size for Instagram or a shop?</summary><p>Yes. In “Save as” choose a size such as Instagram post or story and a maximum file size, and it is applied when you download.</p></details>
+          <details><summary>How fast is it?</summary><p>A few seconds on most computers with a graphics card, up to about half a minute on slower devices.</p></details>
+        </div>
+      </section><!--/seo:content-->
+    </section>
+
+    <!-- working -->
+    <section id="busy" class="busy" hidden>
+      <div class="orbit"><span></span></div>
+      <div id="busyMsg"></div>
+    </section>
+
+    <!-- batch: many images at once -->
+    <section id="batch" class="batch" hidden>
+      <div class="batch-head">
+        <div>
+          <h2 id="batchTitle"></h2>
+          <div id="batchSummary" class="hint"></div>
+        </div>
+        <div class="batch-actions">
+          <label class="ghost-btn" for="fileInput" data-i18n="batch.add">＋ Add more</label>
+          <button id="batchClear" class="ghost-btn" data-i18n="batch.clear">Clear all</button>
+          <button id="zipBtn" class="cta small-cta" data-i18n="batch.zip">⬇ Download all (ZIP)</button>
+        </div>
+      </div>
+      <div id="batchBar" class="bar" hidden><span id="batchBarFill"></span></div>
+      <div id="batchGrid" class="batch-grid"></div>
+      <p class="hint center" data-i18n="batch.hint"></p>
+    </section>
+
+    <!-- video -->
+    <section id="videoView" class="vview" hidden>
+      <div class="vhead">
+        <div>
+          <h2 id="vName"></h2>
+          <div id="vInfo" class="hint"></div>
+        </div>
+        <button id="vAgain" class="back"><span class="ic">←</span><span data-i18n="video.again">Another file</span></button>
+      </div>
+      <div id="vStatus" class="status"></div>
+
+      <div class="grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="video.title">Video</h2>
+            <div class="toolbar">
+              <button id="vBrushBtn" class="tool" data-i18n="video.brush">🖌 Brush fixed objects</button>
+            </div>
+          </div>
+          <div id="vBrushBar" class="toolbar-row" hidden>
+            <span class="hint" data-i18n="video.brushHint">Paint over logos or text that stay in the same place</span>
+            <label class="size"><span data-i18n="brush.size">Size</span> <input id="vBrushSize" type="range" min="6" max="160" value="30" /></label>
+            <button id="vBrushClear" class="tool" data-i18n="brush.clear">Clear</button>
+          </div>
+          <div id="vStage" class="vstage">
+            <video id="vBefore" playsinline preload="auto"></video>
+            <video id="vAfter" class="after" playsinline preload="auto" hidden></video>
+            <canvas id="vStill" class="vlayer"></canvas>
+            <canvas id="vPaint" class="vlayer paint"></canvas>
+            <div id="vSpot" class="vspot" hidden></div>
+            <div id="vDivider" class="divider" hidden><span>⟷</span></div>
+            <div id="vTagBefore" class="tag tag-l" data-i18n="tag.before" hidden>Before</div>
+            <div id="vTagAfter" class="tag tag-r" data-i18n="tag.after" hidden>After</div>
+            <div id="vCursor" class="brush-cursor" hidden></div>
+            <div id="vOverlay" class="up-overlay" hidden>
+              <div class="up-card">
+                <div class="ring">
+                  <svg viewBox="0 0 44 44"><circle class="track" cx="22" cy="22" r="19" /><circle id="vArc" class="arc" cx="22" cy="22" r="19" /></svg>
+                  <b id="vPct"></b>
+                </div>
+                <div class="up-text"><b id="vWorkTitle"></b><span id="vWorkSub"></span></div>
+                <button id="vCancel" class="ghost small-btn" data-i18n="work.cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div class="vcontrols">
+            <button id="vPlay" class="vplay" aria-label="Play">▶</button>
+            <input id="vSeek" type="range" min="0" max="1000" value="0" aria-label="Seek" />
+            <span id="vTime" class="hint">0:00</span>
+          </div>
+          <p id="vHint" class="hint center"></p>
+        </div>
+
+        <div class="side">
+          <div class="panel">
+            <div class="panel-head"><h2 data-i18n="video.removeTitle">Remove</h2></div>
+            <p class="hint" data-i18n="video.removeText">The Gemini logo is removed from every frame. Anything you painted with the brush is erased too. Sound and quality are kept.</p>
+            <button id="vRun" class="cta" data-i18n="video.run" disabled>✨ Remove &amp; create video</button>
+            <p id="vRunHint" class="hint center"></p>
+          </div>
+          <div id="vSave" class="panel save" hidden>
+            <div class="panel-head"><h2 data-i18n="panel.save">Save as</h2></div>
+            <label class="name-field">
+              <span data-i18n="save.name">File name</span>
+              <span class="name-box"><input id="vFileName" type="text" spellcheck="false" autocomplete="off" /><b id="vFileExt">.mp4</b></span>
+            </label>
+            <button id="vDownload" class="cta"><span data-i18n="save.download">⬇ Download</span> <small id="vDlInfo"></small></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- result -->
+    <section id="result" class="result" hidden>
+      <div class="editor-top">
+        <button id="backBtn" class="back" hidden><span class="ic">←</span><span id="backLabel"></span></button>
+        <button id="saveBackBtn" class="save-back" hidden>
+          <span class="ic">✓</span>
+          <span class="txt"><b data-i18n="save.backTitle">Save changes</b><small data-i18n="save.backSub">and go back to all images</small></span>
+        </button>
+      </div>
+      <ol class="steps">
+        <li id="step1" class="done"><span>1</span><b data-i18n="step.clean">Clean</b></li>
+        <li id="step2"><span>2</span><b data-i18n-html="step.upscale">Upscale <em>(optional)</em></b></li>
+        <li id="step3"><span>3</span><b data-i18n="step.download">Download</b></li>
+      </ol>
+
+      <div id="status" class="status"></div>
+
+      <div class="grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="panel.full">Full image</h2>
+            <div class="toolbar">
+              <button id="brushBtn" class="tool" data-i18n="tool.erase">🖌 Erase</button>
+              <button id="cropBtn" class="tool" data-i18n="tool.crop">✂ Crop</button>
+              <button id="undoBtn" class="tool" data-i18n="tool.undo" disabled>↶ Undo</button>
+              <div class="seg" role="group" aria-label="Zoom">
+                <button data-zoom="1" class="active" data-i18n="zoom.fit">Fit</button><button data-zoom="2">2×</button><button data-zoom="4">4×</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="brushBar" class="toolbar-row" hidden>
+            <span class="hint" data-i18n="brush.hint"></span>
+            <label class="size"><span data-i18n="brush.size">Size</span> <input id="brushSize" type="range" min="6" max="160" value="36" /></label>
+            <button id="brushClear" class="tool" data-i18n="brush.clear">Clear</button>
+            <button id="brushApply" class="tool primary-tool" data-i18n="brush.apply" disabled>✨ Erase</button>
+            <button id="brushDone" class="tool" data-i18n="brush.done">Done</button>
+          </div>
+          <div id="cropBar" class="toolbar-row" hidden>
+            <div class="seg" role="group" aria-label="Crop ratio">
+              <button data-ratio="free" class="active" data-i18n="crop.free">Free</button><button data-ratio="1">1:1</button><button data-ratio="0.8">4:5</button><button data-ratio="1.7778">16:9</button><button data-ratio="0.5625">9:16</button>
+            </div>
+            <span id="cropSize" class="hint"></span>
+            <button id="cropCancel" class="tool" data-i18n="crop.cancel">Cancel</button>
+            <button id="cropApply" class="tool primary-tool" data-i18n="crop.apply">✓ Apply crop</button>
+          </div>
+
+          <div id="viewport" class="viewport">
+          <div id="compare" class="compare">
+            <canvas id="beforeCanvas"></canvas>
+            <canvas id="afterCanvas" class="after"></canvas>
+            <div id="spot" class="spot" hidden></div>
+            <div class="divider"><span>⟷</span></div>
+            <div id="tagBefore" class="tag tag-l"></div>
+            <div id="tagAfter" class="tag tag-r"></div>
+            <canvas id="paintCanvas" class="paint"></canvas>
+            <div id="brushCursor" class="brush-cursor" hidden></div>
+            <div id="cropBox" class="crop-box" hidden>
+              <span data-h="nw"></span><span data-h="ne"></span><span data-h="sw"></span><span data-h="se"></span>
+            </div>
+
+            <!-- shown while upscaling or erasing: the image updates underneath -->
+            <div id="upOverlay" class="up-overlay" hidden>
+              <div id="tileCursor" class="tile-cursor"></div>
+              <div class="up-card">
+                <div class="ring">
+                  <svg viewBox="0 0 44 44"><circle class="track" cx="22" cy="22" r="19" /><circle id="ringArc" class="arc" cx="22" cy="22" r="19" /></svg>
+                  <b id="upPct">0%</b>
+                </div>
+                <div class="up-text"><b id="upTitle"></b><span id="upSub"></span></div>
+                <button id="upCancel" class="ghost small-btn" data-i18n="work.cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+          </div>
+          <p id="viewHint" class="hint center"></p>
+        </div>
+
+        <div class="side">
+          <div class="panel">
+            <div class="panel-head">
+              <h2 data-i18n="panel.closeup">Close-up</h2>
+              <div class="zoom-tools">
+                <span id="zoomMode" class="hint"></span>
+                <div class="seg" role="group" aria-label="Close-up zoom">
+                  <button id="zoomOut" title="Zoom out">−</button><button id="zoomIn" title="Zoom in">+</button>
+                </div>
+              </div>
+            </div>
+            <div id="zoomCompare" class="compare zoom">
+              <canvas id="zoomBefore"></canvas>
+              <canvas id="zoomAfter" class="after"></canvas>
+              <div class="divider"><span>⟷</span></div>
+              <div id="capBefore" class="tag tag-l"></div>
+              <div id="capAfter" class="tag tag-r"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2 data-i18n="panel.bg">Background</h2><span id="bgEngine" class="hint"></span></div>
+            <button id="bgRemoveBtn" class="option bg-remove"><b data-i18n="bg.remove">✂ Remove background</b><small data-i18n="bg.removeSub">AI finds the subject and cuts it out</small></button>
+            <div id="bgOptions" class="bg-options" hidden>
+              <span class="hint" data-i18n="bg.newBg">New background:</span>
+              <div class="swatches">
+                <button data-bg="transparent" class="swatch sw-clear" title="Transparent"></button>
+                <button data-bg="white" class="swatch sw-white" title="White"></button>
+                <button data-bg="blur" class="swatch sw-blur" title="Blurred original">Blur</button>
+                <label class="swatch sw-color" title="Any colour"><input id="bgColor" type="color" value="#6d5dfc" /></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2 data-i18n="panel.upscale">Upscale with AI</h2><span id="engine" class="hint"></span></div>
+            <div class="seg wide two" role="group" aria-label="Image type">
+              <button data-model="photo" class="active" data-i18n="model.photo">📷 Photo</button><button data-model="art" data-i18n="model.art">🎨 Art / Anime</button>
+            </div>
+            <p class="hint model-hint" data-i18n="model.hint">Photo: real photos, people, products · Art: drawings, anime, cartoons, logos</p>
+            <div class="options">
+              <button id="up2Btn" class="option"><b>HD 2×</b><small id="up2Size"></small></button>
+              <button id="up4kBtn" class="option"><b>4K</b><small id="up4kSize"></small></button>
+            </div>
+            <div id="upProgress" class="progress" hidden>
+              <div class="bar"><span id="upBar"></span></div>
+              <div id="upMsg" class="hint"></div>
+            </div>
+          </div>
+
+          <div class="panel save">
+            <div class="panel-head"><h2 data-i18n="panel.save">Save as</h2><span id="dlSize" class="hint"></span></div>
+            <label class="name-field">
+              <span data-i18n="save.name">File name</span>
+              <span class="name-box"><input id="fileName" type="text" spellcheck="false" autocomplete="off" /><b id="fileExt">.png</b></span>
+            </label>
+            <div class="save-grid">
+              <label class="name-field"><span data-i18n="save.size">Size</span>
+                <select id="sizePreset" class="select">
+                  <option value="original" data-i18n="size.original">Original size</option>
+                  <option value="1080x1080">Instagram post · 1080×1080</option>
+                  <option value="1080x1350">Instagram portrait · 1080×1350</option>
+                  <option value="1080x1920">Story / Reel / WhatsApp status · 1080×1920</option>
+                  <option value="1280x720">YouTube thumbnail · 1280×720</option>
+                  <option value="1200x630">Facebook / link preview · 1200×630</option>
+                  <option value="1200x627">LinkedIn post · 1200×627</option>
+                  <option value="1600x900">X (Twitter) post · 1600×900</option>
+                  <option value="1000x1500">Pinterest pin · 1000×1500</option>
+                  <option value="1920x1080">Full HD · 1920×1080</option>
+                </select>
+              </label>
+              <label class="name-field"><span data-i18n="save.limit">Max file size</span>
+                <select id="sizeLimit" class="select">
+                  <option value="0" data-i18n="limit.none">No limit</option>
+                  <option value="2097152">2 MB</option>
+                  <option value="1048576">1 MB</option>
+                  <option value="512000">500 KB</option>
+                  <option value="204800">200 KB</option>
+                </select>
+              </label>
+            </div>
+            <div id="fitRow" class="seg wide two" role="group" aria-label="Fit" hidden>
+              <button data-fit="fill" class="active" data-i18n="fit.fill">Fill (crop)</button><button data-fit="fit" data-i18n="fit.fit">Fit (whole image)</button>
+            </div>
+            <div class="seg wide" role="group" aria-label="File format">
+              <button data-format="image/png">PNG</button><button data-format="image/jpeg">JPG</button><button data-format="image/webp">WebP</button>
+            </div>
+            <div class="save-row">
+              <button id="downloadBtn" class="cta"><span data-i18n="save.download">⬇ Download</span> <small id="dlInfo"></small></button>
+              <button id="copyBtn" class="tool copy" data-i18n="save.copy" hidden>📋 Copy</button>
+            </div>
+          </div>
+          <button id="againBtn" class="ghost" data-i18n="again">↺ Start over with another image</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <footer class="foot">
+    <!--seo:tools--><nav class="tools-nav" aria-label="Tools"><a href="./">Gemini watermark remover</a> · <a href="gemini-video-watermark-remover/">Video watermark remover</a> · <span aria-current="page">Background remover</span> · <a href="ai-image-upscaler/">AI image upscaler</a> · <a href="remove-objects-from-photo/">Remove objects from photos</a> · <a href="resize-image-for-social-media/">Resize for social media</a></nav><!--/seo:tools-->
+    <p>
+      <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button> ·
+      <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> ·
+      <span data-report-wrap><a class="linklike" href="#" data-report data-i18n="link.report">Report a problem</a> ·</span>
+      <span data-i18n-html="footer"></span>
+    </p>
+  </footer>
+
+  <dialog id="upConfirm" class="info confirm">
+    <div class="confirm-ico">⤢</div>
+    <h2 id="ucTitle"></h2>
+    <p id="ucSize" class="big-size"></p>
+    <ul class="facts compact">
+      <li id="ucModel"></li>
+      <li id="ucTime"></li>
+      <li data-i18n="confirm.ai"></li>
+      <li data-i18n="confirm.tab"></li>
+      <li id="ucLimit" data-i18n="confirm.limit" hidden></li>
+    </ul>
+    <div class="confirm-actions">
+      <button id="ucCancel" class="ghost" data-i18n="confirm.no">Not now</button>
+      <button id="ucStart" class="cta" data-i18n="confirm.start">Start upscaling</button>
+    </div>
+  </dialog>
+
+  <dialog id="leaveDialog" class="info confirm">
+    <div class="confirm-ico">✏️</div>
+    <h2 data-i18n="leave.title">Save your changes?</h2>
+    <p class="hint" data-i18n="leave.text">You edited this image. Save the changes before going back to all images?</p>
+    <div class="confirm-actions three">
+      <button id="leaveStay" class="ghost" data-i18n="leave.stay">Keep editing</button>
+      <button id="leaveDiscard" class="ghost" data-i18n="leave.discard">Discard</button>
+      <button id="leaveSave" class="cta" data-i18n="leave.save">Save changes</button>
+    </div>
+  </dialog>
+
+  <dialog id="info" class="info">
+    <form method="dialog"><button class="close" aria-label="Close">✕</button></form>
+    <section data-panel="privacy">
+      <h2 data-i18n="privacy.title"></h2>
+      <ul class="facts">
+        <li data-i18n-html="privacy.1"></li>
+        <li data-i18n-html="privacy.2"></li>
+        <li data-i18n-html="privacy.3"></li>
+        <li data-i18n-html="privacy.4"></li>
+        <li data-i18n-html="privacy.5"></li>
+      </ul>
+      <p class="hint" data-i18n="privacy.note"></p>
+    </section>
+    <section data-panel="fair">
+      <h2 data-i18n="fair.title"></h2>
+      <p data-i18n-html="fair.intro"></p>
+      <ul class="facts">
+        <li class="ok-li" data-i18n="fair.ok"></li>
+        <li class="no-li" data-i18n="fair.no1"></li>
+        <li class="no-li" data-i18n="fair.no2"></li>
+        <li class="no-li" data-i18n="fair.no3"></li>
+      </ul>
+      <p class="hint" data-i18n="fair.note"></p>
+    </section>
+  </dialog>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/guard.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/work.js"></script>
+  <script src="js/zip.js"></script>
+  <script src="js/upscale.js"></script>
+  <script src="js/fill.js"></script>
+  <script src="js/eraser.js"></script>
+  <script src="js/bgremove.js"></script>
+  <script src="js/video.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/videoapp.js"></script>
+  <script src="js/prefs.js"></script>
+  <script src="js/magic.js"></script>
+</body>
+</html>

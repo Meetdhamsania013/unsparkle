@@ -21,6 +21,8 @@
     batchGrid: $('batchGrid'), zipBtn: $('zipBtn'), batchClear: $('batchClear'), backBtn: $('backBtn'),
     copyBtn: $('copyBtn'), dlSize: $('dlSize'), fileNameInput: $('fileName'), fileExt: $('fileExt'),
     saveBackBtn: $('saveBackBtn'), toast: $('toast'),
+    bgRemoveBtn: $('bgRemoveBtn'), bgOptions: $('bgOptions'), bgColor: $('bgColor'), bgEngine: $('bgEngine'),
+    sizePreset: $('sizePreset'), sizeLimit: $('sizeLimit'), fitRow: $('fitRow'),
   };
   const FOUR_K = 3840;
   // Phones and low-memory devices get smaller limits so the tab doesn't crash.
@@ -43,6 +45,8 @@
     painted: false,
     format: 'image/png', formatChosen: false,
     upModel: 'photo', // 'photo' | 'art'
+    bg: null,         // { source, mask, kind, color } after "Remove background"
+    fit: 'fill',      // social size: 'fill' (crop) | 'fit' (whole image)
   };
 
   // ---------- helpers ----------
@@ -299,6 +303,10 @@
     el.dlInfo.textContent = `${out.width} × ${out.height} · ${extOf(state.format).toUpperCase()}`;
     el.backBtn.disabled = state.busy;
     el.saveBackBtn.hidden = !(items.length > 1 && isDirty());
+    el.bgRemoveBtn.disabled = state.busy;
+    el.bgOptions.hidden = !state.bg;
+    document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', !!state.bg && state.bg.kind === b.dataset.bg));
+    el.bgColor.parentElement.classList.toggle('active', !!state.bg && state.bg.kind === 'color');
     el.saveBackBtn.disabled = state.busy;
     el.step2.classList.toggle('done', !!state.big);
     el.step3.classList.toggle('done', false);
@@ -308,7 +316,8 @@
 
     const parts = [];
     if (state.removed) parts.push(state.logos.length > 1 ? tr('status.removedMany', { n: state.logos.length }) : tr('status.removed'));
-    if (state.edited) parts.push(tr('status.edited'));
+    if (state.bg) parts.push(tr('status.bg'));
+    else if (state.edited) parts.push(tr('status.edited'));
     if (state.big) parts.push(tr('status.upscaled', { w: state.big.width, h: state.big.height }));
     if (parts.length) setStatus(parts.join('   ·   '), 'ok');
     else setStatus(tr('status.none'), 'warn');
@@ -542,9 +551,10 @@
         el.zipBtn.textContent = tr('batch.preparing', { k: k + 1, n: ready.length });
         const item = ready[k];
         const src = item.saved ? item.saved.big || item.saved.clean : item.clean;
-        const type = state.format || item.type;
-        // re-encode only when a different format was chosen
-        const blob = type === 'image/png' ? src : await canvasToBlob(await blobToCanvas(src), type);
+        // same size preset, format and size limit as the editor
+        const cv = await blobToCanvas(src);
+        const { blob } = await exportBlob(cv);
+        cv.width = cv.height = 0;
         files.push({ name: `${item.outName || item.name}.${extOf(blob.type)}`, blob });
       }
       el.zipBtn.textContent = tr('batch.zipping');
@@ -599,6 +609,23 @@
     markSaved();
     refresh();
     show('result');
+    highlightFocus();
+  }
+
+  // Visitors from a tool page (e.g. /background-remover/) see that tool highlighted once.
+  let focusShown = false;
+  function highlightFocus() {
+    const f = document.body.dataset.focus;
+    if (!f || focusShown) return;
+    const target = { bg: el.bgRemoveBtn, upscale: el.up2Btn, erase: el.brushBtn, save: el.sizePreset }[f];
+    const panel = target && (f === 'erase' ? target : target.closest('.panel'));
+    if (!panel) return;
+    focusShown = true;
+    setTimeout(() => {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      panel.classList.add('focus-glow');
+      setTimeout(() => panel.classList.remove('focus-glow'), 4500);
+    }, 400);
   }
 
   // Unsaved changes = the editor's images differ from what was opened or last saved.
@@ -690,19 +717,168 @@
 
   // file size for the chosen format, computed in the background
   let sizeJob = 0;
+  // ---------- export: social size, fit/fill, file-size limit ----------
+
+  function makeCanvas(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    return c;
+  }
+
+  // Resize to the chosen social-media size (or keep the original).
+  function exportCanvas(src) {
+    const preset = el.sizePreset.value;
+    if (preset === 'original') return src;
+    const [tw, th] = preset.split('x').map(Number);
+    const c = makeCanvas(tw, th), ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    const sr = src.width / src.height, tr2 = tw / th;
+    if (state.fit === 'fill') {
+      // crop the middle to the target shape
+      let sw = src.width, sh = src.height, sx = 0, sy = 0;
+      if (sr > tr2) { sw = Math.round(src.height * tr2); sx = Math.round((src.width - sw) / 2); }
+      else { sh = Math.round(src.width / tr2); sy = Math.round((src.height - sh) / 2); }
+      ctx.drawImage(src, sx, sy, sw, sh, 0, 0, tw, th);
+    } else {
+      // whole image; a soft blurred copy fills the empty bars (kept clear for transparent cut-outs)
+      if (!(state.bg && state.bg.kind === 'transparent')) {
+        const k = Math.max(tw / src.width, th / src.height) * 1.1;
+        ctx.filter = `blur(${Math.round(Math.max(tw, th) / 40)}px) brightness(0.9)`;
+        ctx.drawImage(src, (tw - src.width * k) / 2, (th - src.height * k) / 2, src.width * k, src.height * k);
+        ctx.filter = 'none';
+      }
+      const k = Math.min(tw / src.width, th / src.height), w = src.width * k, h = src.height * k;
+      ctx.drawImage(src, (tw - w) / 2, (th - h) / 2, w, h);
+    }
+    return c;
+  }
+
+  // JPEG has no transparency: put a white background behind it.
+  function flatten(src) {
+    const c = makeCanvas(src.width, src.height), ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(src, 0, 0);
+    return c;
+  }
+
+  function scaled(src, k) {
+    const c = makeCanvas(Math.max(1, Math.round(src.width * k)), Math.max(1, Math.round(src.height * k)));
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(src, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  // Encode, lowering quality (then size) only as much as needed to fit the limit.
+  async function encodeLimited(cv, type, limit) {
+    const src = type === 'image/jpeg' ? flatten(cv) : cv;
+    const first = await canvasToBlob(src, type, 0.92);
+    if (!limit || !first || first.size <= limit) return { blob: first, canvas: src };
+    let cur = src, k = 1;
+    for (let round = 0; round < 10; round++) {
+      if (first.type !== 'image/png') {
+        let lo = 0.35, hi = 0.92, best = null;
+        for (let i = 0; i < 6; i++) {
+          const q = (lo + hi) / 2, b = await canvasToBlob(cur, type, q);
+          if (b.size <= limit) { best = b; lo = q; } else hi = q;
+        }
+        if (best) return { blob: best, canvas: cur };
+      } else {
+        const b = await canvasToBlob(cur, type);
+        if (b.size <= limit) return { blob: b, canvas: cur, shrunk: true };
+      }
+      k *= 0.85;
+      cur = scaled(src, k);
+    }
+    return { blob: await canvasToBlob(cur, type, 0.4), canvas: cur };
+  }
+
+  async function exportBlob(src) {
+    return encodeLimited(exportCanvas(src), state.format, +el.sizeLimit.value);
+  }
+
   async function updateSaveInfo() {
     const out = state.big || state.clean;
     if (!out) return;
     document.querySelectorAll('[data-format]').forEach((b) => b.classList.toggle('active', b.dataset.format === state.format));
-    el.dlInfo.textContent = `${out.width} × ${out.height} · ${extOf(state.format).toUpperCase()}`;
+    document.querySelectorAll('[data-fit]').forEach((b) => b.classList.toggle('active', b.dataset.fit === state.fit));
+    el.fitRow.hidden = el.sizePreset.value === 'original';
     el.fileExt.textContent = '.' + extOf(state.format);
     const job = ++sizeJob;
-    el.dlSize.textContent = '';
-    await new Promise((r) => setTimeout(r, 150));
+    el.dlSize.textContent = tr('save.preparing');
+    await new Promise((r) => setTimeout(r, 200));
     if (job !== sizeJob) return;
-    const blob = await canvasToBlob(out, state.format);
-    if (job === sizeJob && blob) el.dlSize.textContent = '≈ ' + formatBytes(blob.size) + (blob.type !== state.format ? ' (PNG: browser has no ' + extOf(state.format).toUpperCase() + ')' : '');
+    const res = await exportBlob(out);
+    if (job !== sizeJob || !res.blob) return;
+    el.dlInfo.textContent = `${res.canvas.width} × ${res.canvas.height} · ${extOf(res.blob.type).toUpperCase()}`;
+    el.dlSize.textContent = '≈ ' + formatBytes(res.blob.size);
+    // PNG can only get smaller by shrinking; WebP keeps transparency and more detail
+    if (res.shrunk) showToast(tr('save.webpTip'));
   }
+
+  [el.sizePreset, el.sizeLimit].forEach((c) => c.addEventListener('change', updateSaveInfo));
+  document.querySelectorAll('[data-fit]').forEach((b) => b.addEventListener('click', () => { state.fit = b.dataset.fit; updateSaveInfo(); }));
+
+  // ---------- background removal ----------
+
+  function applyBg() {
+    state.clean = WMBackground.compose(state.bg.source, state.bg.mask, state.bg.kind, state.bg.color);
+    state.big = null;
+    state.choice = null;
+    state.edited = true;
+    renderMain();
+    refresh();
+  }
+
+  el.bgRemoveBtn.addEventListener('click', async () => {
+    if (state.busy || !state.clean) return;
+    if (!WMBackground.available()) return setStatus(tr('bg.needWeb'), 'warn');
+    setMode('compare');
+    state.busy = true;
+    refresh();
+    showWorking(tr('bg.title'), tr('bg.finding'));
+    try {
+      const source = state.bg ? state.bg.source : state.clean; // "again" starts from the image with its background
+      const mask = await WMBackground.mask(source, (st) => {
+        if (st.download != null) {
+          const pct = Math.round(st.download * 100);
+          ov.ring.classList.remove('loading');
+          ov.pct.textContent = pct + '%';
+          ov.arc.style.strokeDashoffset = String(119.4 * (1 - st.download));
+          ov.sub.textContent = tr('bg.downloading', { p: pct });
+        } else if (st.message) {
+          ov.ring.classList.add('loading');
+          ov.pct.textContent = '';
+          ov.sub.textContent = tr('bg.finding');
+          el.bgEngine.textContent = st.message === 'gpu' ? '⚡ GPU' : 'CPU';
+        }
+      });
+      pushHistory();
+      state.bg = { source, mask, kind: 'transparent', color: el.bgColor.value };
+      if (state.format === 'image/jpeg') { state.format = 'image/png'; showToast(tr('bg.pngNote')); }
+      applyBg();
+    } catch (e) {
+      console.error(e);
+      setStatus(tr('bg.failed', { e: e.message }), 'warn');
+      showToast(tr('bg.failed', { e: e.message }));
+    } finally {
+      hideWorking();
+      state.busy = false;
+      refresh();
+    }
+  });
+  document.querySelectorAll('[data-bg]').forEach((b) => b.addEventListener('click', () => {
+    if (!state.bg || state.busy) return;
+    state.bg.kind = b.dataset.bg;
+    applyBg();
+  }));
+  el.bgColor.addEventListener('input', () => {
+    if (!state.bg || state.busy) return;
+    state.bg.kind = 'color';
+    state.bg.color = el.bgColor.value;
+    applyBg();
+  });
 
   function cleanFileName(name) {
     // drop characters Windows/macOS don't allow and a typed extension
@@ -726,7 +902,7 @@
   el.downloadBtn.addEventListener('click', async () => {
     const out = state.big || state.clean;
     if (!out) return;
-    const blob = await canvasToBlob(out, state.format);
+    const { blob } = await exportBlob(out);
     saveBlob(blob, `${state.fileName}.${extOf(blob.type)}`);
     el.step3.classList.add('done');
   });
@@ -962,7 +1138,7 @@
   // ---------- undo ----------
 
   function pushHistory() {
-    state.history.push({ original: state.original, clean: state.clean, big: state.big, bigModel: state.bigModel, choice: state.choice, edited: state.edited });
+    state.history.push({ original: state.original, clean: state.clean, big: state.big, bigModel: state.bigModel, choice: state.choice, edited: state.edited, bg: state.bg });
     if (state.history.length > 15) state.history.shift();
   }
 
@@ -970,7 +1146,7 @@
     if (state.busy || !state.history.length) return;
     const h = state.history.pop();
     const sizeChanged = h.clean.width !== state.clean.width || h.clean.height !== state.clean.height;
-    Object.assign(state, { original: h.original, clean: h.clean, big: h.big, bigModel: h.bigModel, choice: h.choice, edited: h.edited });
+    Object.assign(state, { original: h.original, clean: h.clean, big: h.big, bigModel: h.bigModel, choice: h.choice, edited: h.edited, bg: h.bg || null });
     clearPaint();
     if (sizeChanged) setSpot(state.clean.width / 2 - 64, state.clean.height / 2 - 64, 128);
     renderMain();
@@ -1089,6 +1265,7 @@
       });
       pushHistory();
       state.clean = canvasFrom(res.image);
+      state.bg = null;
       state.big = null; // edits happen at the original size; upscale again afterwards
       state.choice = null;
       state.edited = true;
@@ -1197,6 +1374,7 @@
     pushHistory();
     state.original = cropCanvas(state.original, r);
     state.clean = cropCanvas(state.clean, r);
+    state.bg = null;
     state.big = null;
     state.choice = null;
     state.edited = true;
@@ -1256,6 +1434,7 @@
       if (cv) { cv.width = 0; cv.height = 0; }
     }
     state.history = [];
+    state.bg = null;
     state.original = state.clean = state.big = null;
     state.logos = [];
     state.spot = null;

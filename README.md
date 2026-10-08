@@ -9,6 +9,8 @@ Remove the corner logo from your AI images and upscale them to HD or 4K. Free, o
 - **One click:** drop an image and the logo is found, removed, and the background restored.
 - **Finds every logo:** scans the corner at every size and position, and also removes a second, older logo left over from an earlier edit.
 - **Video:** removes the Gemini/Veo logo from every frame automatically (logo found on an average of many frames, so no flicker), plus a brush for fixed logos or text. Keeps resolution, frame rate and the original sound. MP4 out (WebM if the browser can't encode MP4).
+- **Background remover:** one click with the ormbg AI (Apache-2.0), then transparent, white, any colour or a blurred background. Transparency survives upscaling.
+- **Social media sizes:** Instagram, Story/Reel/WhatsApp, YouTube thumbnail, Facebook, LinkedIn, X and Pinterest presets, with Fill or Fit and a max file size (1 MB, 500 KB …). Applied on download and in the ZIP.
 - **Batch mode:** drop many images at once. They're cleaned in the background, then **Download all (ZIP)**; click any one to edit it.
 - **AI upscaling:** HD 2× or 4K with Real-ESRGAN in the browser, with a **Photo** or **Art/Anime** model (GPU via WebGPU, multi-core CPU fallback). It asks first, shows the estimated time, and can be cancelled. Phones get a safe size limit.
 - **Save as** PNG, JPG or WebP with the file size shown, or **copy to clipboard**.
@@ -29,6 +31,11 @@ Upscaling loads the onnxruntime-web engine from jsDelivr, so the first upscale n
 > 3. On every release, bump `VERSION` in `sw.js` so installed copies update.
 >
 > **Best host:** Cloudflare Pages or Netlify. They apply `_headers`, which enables the strict security policy and **multi-core AI (about 2.3× faster upscaling)**. GitHub Pages works too, just without those headers.
+
+## SEO pages
+`node tools/seo-pages.js` builds the landing pages from `index.html`. Each is the full tool with its own title, description, heading, how-to steps, FAQ and structured data:
+`/`, `/gemini-video-watermark-remover/`, `/background-remover/`, `/ai-image-upscaler/`, `/remove-objects-from-photo/`, `/resize-image-for-social-media/`, plus `sitemap.xml` and `robots.txt`.
+Edit the text in `tools/seo-pages.js` and rerun it after changing `index.html`.
 
 ## How it works
 | Step | File | What happens |
@@ -52,6 +59,7 @@ Tests: `npm test`
 - Logo alpha masks from [gemini-watermark-remover](https://github.com/GargantuaX/gemini-watermark-remover), MIT
 - [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) models (general-x4v3, animevideov3), BSD-3-Clause
 - [MI-GAN](https://github.com/Picsart-AI-Research/MI-GAN) inpainting model, MIT
+- [ormbg](https://huggingface.co/schirrmacher/ormbg) background-removal model, Apache-2.0
 - [Mediabunny](https://github.com/Vanilagy/mediabunny) video reading/writing, MPL-2.0 (unmodified)
 - [onnxruntime-web](https://github.com/microsoft/onnxruntime) AI engine, MIT (loaded from jsDelivr)
 - Fonts: Inter and Space Grotesk, SIL Open Font License (`assets/fonts`)

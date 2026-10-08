@@ -114,6 +114,17 @@
     const iw = Math.max(1, Math.round(srcCanvas.width * k)), ih = Math.max(1, Math.round(srcCanvas.height * k));
     const input = k < 1 ? resized(srcCanvas, iw, ih) : srcCanvas;
     const src = input.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, iw, ih).data;
+    // Transparent images (e.g. after background removal): the AI only sees colour,
+    // so see-through pixels are shown to it on neutral grey, and the transparency
+    // itself is enlarged separately and put back at the end.
+    let hasAlpha = false;
+    for (let i = 3; i < src.length; i += 4) if (src[i] < 255) { hasAlpha = true; break; }
+    if (hasAlpha) {
+      for (let i = 0; i < src.length; i += 4) {
+        const a = src[i + 3] / 255;
+        if (a < 1) { src[i] = src[i] * a + 128 * (1 - a); src[i + 1] = src[i + 1] * a + 128 * (1 - a); src[i + 2] = src[i + 2] * a + 128 * (1 - a); }
+      }
+    }
 
     const S = MODEL_SCALE, ow = iw * S, oh = ih * S;
     const out = new ImageData(ow, oh);
@@ -182,6 +193,13 @@
 
     measuredRate = (performance.now() - t0) / 1000 / (iw * ih);
     measuredBackend = backend;
+    if (hasAlpha) {
+      const ac = canvasOf(ow, oh), actx = ac.getContext('2d', { willReadFrequently: true });
+      actx.imageSmoothingQuality = 'high';
+      actx.drawImage(input, 0, 0, ow, oh);
+      const ad = actx.getImageData(0, 0, ow, oh).data;
+      for (let i = 3; i < ad.length; i += 4) out.data[i] = ad[i];
+    }
     const full = canvasOf(ow, oh);
     full.getContext('2d').putImageData(out, 0, 0);
     if (ow === outW && oh === outH) return full;

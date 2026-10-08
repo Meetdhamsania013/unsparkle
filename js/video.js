@@ -13,8 +13,24 @@
   const M = () => root.Mediabunny;
   const SAMPLE_FRAMES = 24;
 
+  // The video library (~700 KB) is only downloaded when someone opens a video.
+  let libPromise = null;
+  function loadLibrary() {
+    if (root.Mediabunny) return Promise.resolve();
+    if (!libPromise) {
+      libPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'js/vendor/mediabunny.min.js';
+        s.onload = resolve;
+        s.onerror = () => { libPromise = null; reject(new Error('Could not load the video tools.')); };
+        document.head.appendChild(s);
+      });
+    }
+    return libPromise;
+  }
+
   function supported() {
-    return !!(root.Mediabunny && root.VideoEncoder && root.VideoDecoder && root.VideoFrame);
+    return !!(root.VideoEncoder && root.VideoDecoder && root.VideoFrame);
   }
 
   function canvasOf(w, h) {
@@ -30,6 +46,7 @@
    * @returns {Promise<object>} info, detected logo (or null), a preview frame and the average frame
    */
   async function analyze(file, onProgress) {
+    await loadLibrary();
     const mb = M();
     const input = new mb.Input({ source: new mb.BlobSource(file), formats: mb.ALL_FORMATS });
     const vt = await input.getPrimaryVideoTrack();
@@ -158,6 +175,7 @@
    * @returns {Promise<{blob: Blob, mime: string, ext: string}>}
    */
   async function process(file, plan, onProgress, signal) {
+    await loadLibrary();
     const mb = M();
     const input = new mb.Input({ source: new mb.BlobSource(file), formats: mb.ALL_FORMATS });
     const vt = await input.getPrimaryVideoTrack();
