@@ -4,7 +4,7 @@
  * are cached the first time they're used. Images are never cached or stored.
  * Bump VERSION on every release so visitors get the new files.
  */
-const VERSION = 'unsparkle-v3';
+const VERSION = 'unsparkle-v4';
 const SHELL = [
   './',
   'index.html',

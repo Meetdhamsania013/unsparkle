@@ -82,6 +82,16 @@
     });
   });
 
+  // ---------- FAQ pop-up (footer link) ----------
+  const faq = $('faqDialog');
+  if (faq) {
+    document.querySelectorAll('[data-faq]').forEach((b) => b.addEventListener('click', () => faq.showModal()));
+    faq.addEventListener('click', (e) => {
+      const r = faq.getBoundingClientRect(); // a click on the backdrop closes it
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) faq.close();
+    });
+  }
+
   root.WMI18n.apply();
   applyTheme();
 })(window);

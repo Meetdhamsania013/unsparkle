@@ -62,6 +62,20 @@
   }
 
   let bytesPromise = null, session = null, backend = null;
+  // Some graphics cards return a noisy, half-transparent mask with this model.
+  // A good mask is almost all clearly in or out (0.5–8% "in between" on tests),
+  // so a GPU result above this is redone on the CPU, which is then used from now on.
+  const MAX_UNSURE = 0.15;
+  const CPU_KEY = 'unsparkle.bgCpu';
+  let cpuOnly = false;
+  try { cpuOnly = localStorage.getItem(CPU_KEY) === '1'; } catch (e) { /* storage blocked */ }
+
+  function unsure(t) {
+    const d = t.data;
+    let n = 0;
+    for (let i = 0; i < d.length; i += 7) if (d[i] > 0.15 && d[i] < 0.85) n++;
+    return n / Math.ceil(d.length / 7);
+  }
 
   async function prepare(onStatus) {
     if (!root.ort) await loadScript(ORT_BASE + 'ort.webgpu.min.js');
@@ -84,6 +98,40 @@
     return new root.ort.Tensor('float32', x, [1, 3, SIZE, SIZE]);
   }
 
+  // Tidy the cut-out: fill small holes fully enclosed by the subject (white
+  // letters or shiny parts the AI was unsure about) and drop tiny floating specks.
+  // Large enclosed openings, like the inside of a bag handle, stay transparent.
+  function cleanMask(px, W, H) {
+    const n = W * H, solid = new Uint8Array(n);
+    for (let i = 0; i < n; i++) solid[i] = px[i * 4 + 3] >= 128 ? 1 : 0;
+    const label = new Int32Array(n).fill(-1), stack = new Int32Array(n);
+    const comps = []; // { solid, area, border }
+    for (let start = 0; start < n; start++) {
+      if (label[start] !== -1) continue;
+      const kind = solid[start], id = comps.length;
+      let top = 0, area = 0, border = false;
+      stack[top++] = start; label[start] = id;
+      while (top) {
+        const p = stack[--top], x = p % W, y = (p / W) | 0;
+        area++;
+        if (x === 0 || y === 0 || x === W - 1 || y === H - 1) border = true;
+        if (x > 0 && label[p - 1] === -1 && solid[p - 1] === kind) { label[p - 1] = id; stack[top++] = p - 1; }
+        if (x < W - 1 && label[p + 1] === -1 && solid[p + 1] === kind) { label[p + 1] = id; stack[top++] = p + 1; }
+        if (y > 0 && label[p - W] === -1 && solid[p - W] === kind) { label[p - W] = id; stack[top++] = p - W; }
+        if (y < H - 1 && label[p + W] === -1 && solid[p + W] === kind) { label[p + W] = id; stack[top++] = p + W; }
+      }
+      comps.push({ solid: kind, area, border });
+    }
+    let largest = 0;
+    for (const c of comps) if (c.solid && c.area > largest) largest = c.area;
+    const holeMax = n * 0.002, speckMax = largest * 0.01;
+    for (let i = 0; i < n; i++) {
+      const c = comps[label[i]];
+      if (!c.solid && !c.border && c.area < holeMax) px[i * 4 + 3] = 255;   // small enclosed hole → fill
+      else if (c.solid && c.area < speckMax) px[i * 4 + 3] = 0;             // tiny floating speck → clear
+    }
+  }
+
   /**
    * Find the foreground of an image.
    * @param {HTMLCanvasElement} src
@@ -97,13 +145,20 @@
     let out = null;
     if (session) out = await session.run({ [session.inputNames[0]]: input });
     else {
-      // GPU first; fall back to the CPU if the graphics card can't run it
-      for (const b of navigator.gpu ? ['webgpu', 'wasm'] : ['wasm']) {
+      // GPU first (fast); the CPU if the graphics card can't run it or gives a noisy mask
+      for (const b of navigator.gpu && !cpuOnly ? ['webgpu', 'wasm'] : ['wasm']) {
         try {
           report({ message: b === 'webgpu' ? 'gpu' : 'cpu' });
           const s = await root.ort.InferenceSession.create(bytes, { executionProviders: [b] });
-          out = await s.run({ [s.inputNames[0]]: input });
-          session = s; backend = b;
+          const r = await s.run({ [s.inputNames[0]]: input });
+          if (b === 'webgpu' && unsure(r[s.outputNames[0]]) > MAX_UNSURE) {
+            console.warn('GPU mask looks noisy; using the CPU instead');
+            cpuOnly = true;
+            try { localStorage.setItem(CPU_KEY, '1'); } catch (e) { /* storage blocked */ }
+            if (s.release) s.release();
+            continue;
+          }
+          out = r; session = s; backend = b;
           break;
         } catch (e) {
           console.warn('Background model backend failed:', b, e);
@@ -124,9 +179,19 @@
     small.getContext('2d').putImageData(id, 0, 0);
     const full = document.createElement('canvas');
     full.width = src.width; full.height = src.height;
-    const fctx = full.getContext('2d');
+    const fctx = full.getContext('2d', { willReadFrequently: true });
     fctx.imageSmoothingQuality = 'high';
     fctx.drawImage(small, 0, 0, full.width, full.height);
+    // True transparency: background fully clear, subject fully solid. Only a
+    // narrow band at the outline stays soft so edges aren't jagged.
+    const fd = fctx.getImageData(0, 0, full.width, full.height);
+    const LO = 0.42 * 255, HI = 0.58 * 255;
+    for (let i = 3; i < fd.data.length; i += 4) {
+      const a = fd.data[i];
+      fd.data[i] = a <= LO ? 0 : a >= HI ? 255 : ((a - LO) / (HI - LO)) * 255;
+    }
+    cleanMask(fd.data, full.width, full.height);
+    fctx.putImageData(fd, 0, 0);
     return full;
   }
 

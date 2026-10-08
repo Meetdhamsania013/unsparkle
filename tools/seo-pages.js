@@ -23,7 +23,7 @@ const PAGES = [
     lead: 'Drop an AI image or video. The Gemini logo is found and erased, the real background is restored, anything else can be wiped away with the brush, and images can be upscaled to HD or 4K.',
     howTitle: 'How to remove the Gemini watermark from an image',
     steps: [
-      ['Drop your image', 'Download the image from Gemini (also known as Nano Banana) and drop it on the box above, or paste it with Ctrl+V. You can drop many images at once.'],
+      ['Drop your image', 'Download the image from Gemini (also known as Nano Banana) and drop it on the upload box, or paste it with Ctrl+V. You can drop many images at once.'],
       ['The logo is removed automatically', 'Unsparkle finds the ✦ sparkle in the corner, removes it and restores the real pixels underneath. Drag the slider to compare before and after.'],
       ['Download', 'Save it with the same file name as PNG, JPG or WebP. Before that you can erase other things with the brush, remove the background, upscale to 4K or resize for social media.'],
     ],
@@ -46,7 +46,7 @@ const PAGES = [
     lead: 'Drop your Veo video. The sparkle logo is found and removed from every frame, with the original sound and quality kept. Fixed text or logos can be brushed away too.',
     howTitle: 'How to remove the watermark from a Gemini (Veo) video',
     steps: [
-      ['Drop your video', 'Drop an MP4, WebM or MOV video made with Gemini or Veo on the box above.'],
+      ['Drop your video', 'Drop an MP4, WebM or MOV video made with Gemini or Veo on the upload box.'],
       ['Check what will be removed', 'Unsparkle finds the logo across the whole video and marks it. To remove the “Veo” text or another logo that stays in place, paint over it with the brush.'],
       ['Create and download', 'Press ✨ Remove & create video, compare before and after with the slider and play button, then download your MP4 with the same file name.'],
     ],
@@ -68,7 +68,7 @@ const PAGES = [
     lead: 'Drop a photo, then press ✂ Remove background in the editor. Keep it transparent, or choose white, any colour or a soft blur: perfect for products, profile pictures and stickers.',
     howTitle: 'How to remove the background from a photo',
     steps: [
-      ['Drop your photo', 'Drop a photo on the box above. People, products, animals and objects all work best when the subject is clear.'],
+      ['Drop your photo', 'Drop a photo on the upload box. People, products, animals and objects all work best when the subject is clear.'],
       ['Press ✂ Remove background', 'In the editor, press ✂ Remove background. The first time, the AI model (about 88 MB) is downloaded once and then remembered by your browser.'],
       ['Choose a background and save', 'Keep it transparent or pick white, any colour or a blurred version of the original, then download as PNG or WebP.'],
     ],
@@ -90,7 +90,7 @@ const PAGES = [
     lead: 'Drop an image and choose HD 2× or 4K in the editor. The AI adds real detail instead of blur, and you can compare normal enlargement with the AI result anywhere in the picture.',
     howTitle: 'How to upscale an image to 4K',
     steps: [
-      ['Drop your image', 'Drop a photo, AI image or illustration on the box above.'],
+      ['Drop your image', 'Drop a photo, AI image or illustration on the upload box.'],
       ['Pick Photo or Art and the size', 'Choose 📷 Photo for real photos or 🎨 Art / Anime for drawings, then HD 2× or 4K. You will see how long it will take before it starts.'],
       ['Compare and download', 'Watch it sharpen tile by tile, compare with the slider and zoom, then download.'],
     ],
@@ -112,7 +112,7 @@ const PAGES = [
     lead: 'Drop a photo, press 🖌 Erase in the editor and paint over what you want gone. The AI rebuilds the background so no one can tell it was there.',
     howTitle: 'How to remove an object from a photo',
     steps: [
-      ['Drop your photo', 'Drop the photo on the box above.'],
+      ['Drop your photo', 'Drop the photo on the upload box.'],
       ['Paint over the object', 'Press 🖌 Erase and paint over the object, text or logo with a little margin. Zoom in for small details.'],
       ['Press ✨ Erase and download', 'The AI fills the area with matching background. Undo if you want to try again, then download.'],
     ],

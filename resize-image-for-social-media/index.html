@@ -91,22 +91,6 @@
         <div class="feature"><div class="f-ico">⤢</div><h3 data-i18n="feat3.t">AI upscale to 4K</h3><p data-i18n="feat3.p">Real-ESRGAN running in your browser adds real sharpness instead of blur.</p></div>
       </div>
 
-      <!--seo:content-->
-<section class="seo" aria-labelledby="howto-title">
-        <h2 id="howto-title">How to resize an image for Instagram, YouTube or WhatsApp</h2>
-        <ol class="howto">
-          <li><b>Drop your image</b><span>Drop one image, or many at once for a batch.</span></li>
-          <li><b>Choose the size</b><span>In “Save as” pick a preset such as Instagram portrait 1080×1350 or YouTube thumbnail 1280×720, then Fill (crop) or Fit (whole image with a soft background).</span></li>
-          <li><b>Set a file size and download</b><span>Optionally choose a maximum file size like 1 MB or 500 KB and a format, then download. A batch downloads as one ZIP.</span></li>
-        </ol>
-        <h2>Frequently asked questions</h2>
-        <div class="faq">
-          <details><summary>Which sizes are included?</summary><p>Instagram post 1080×1080 and portrait 1080×1350, Story / Reel / WhatsApp status 1080×1920, YouTube thumbnail 1280×720, Facebook 1200×630, LinkedIn 1200×627, X 1600×900, Pinterest 1000×1500 and Full HD.</p></details>
-          <details><summary>What is the difference between Fill and Fit?</summary><p>Fill crops the image to fill the whole frame. Fit keeps the whole image and fills the empty space with a soft blurred copy.</p></details>
-          <details><summary>How does the file size limit work?</summary><p>Quality is lowered only as much as needed to stay under the limit, and the picture is made smaller only if that is not enough.</p></details>
-          <details><summary>Is it free and private?</summary><p>Yes. It is free, needs no account, and your images never leave your device.</p></details>
-        </div>
-      </section><!--/seo:content-->
     </section>
 
     <!-- working -->
@@ -387,6 +371,7 @@
     <!--seo:tools--><nav class="tools-nav" aria-label="Tools"><a href="./">Gemini watermark remover</a> · <a href="gemini-video-watermark-remover/">Video watermark remover</a> · <a href="background-remover/">Background remover</a> · <a href="ai-image-upscaler/">AI image upscaler</a> · <a href="remove-objects-from-photo/">Remove objects from photos</a> · <span aria-current="page">Resize for social media</span></nav><!--/seo:tools-->
     <p>
       <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button> ·
+      <button class="linklike" data-faq data-i18n="link.faq">FAQ</button> ·
       <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> ·
       <span data-report-wrap><a class="linklike" href="#" data-report data-i18n="link.report">Report a problem</a> ·</span>
       <span data-i18n-html="footer"></span>
@@ -419,6 +404,26 @@
       <button id="leaveDiscard" class="ghost" data-i18n="leave.discard">Discard</button>
       <button id="leaveSave" class="cta" data-i18n="leave.save">Save changes</button>
     </div>
+  </dialog>
+
+  <dialog id="faqDialog" class="info faq-dialog" aria-label="Help and FAQ">
+    <form method="dialog"><button class="close" aria-label="Close">✕</button></form>
+    <!--seo:content-->
+<section class="seo" aria-labelledby="howto-title">
+        <h2 id="howto-title">How to resize an image for Instagram, YouTube or WhatsApp</h2>
+        <ol class="howto">
+          <li><b>Drop your image</b><span>Drop one image, or many at once for a batch.</span></li>
+          <li><b>Choose the size</b><span>In “Save as” pick a preset such as Instagram portrait 1080×1350 or YouTube thumbnail 1280×720, then Fill (crop) or Fit (whole image with a soft background).</span></li>
+          <li><b>Set a file size and download</b><span>Optionally choose a maximum file size like 1 MB or 500 KB and a format, then download. A batch downloads as one ZIP.</span></li>
+        </ol>
+        <h2>Frequently asked questions</h2>
+        <div class="faq">
+          <details><summary>Which sizes are included?</summary><p>Instagram post 1080×1080 and portrait 1080×1350, Story / Reel / WhatsApp status 1080×1920, YouTube thumbnail 1280×720, Facebook 1200×630, LinkedIn 1200×627, X 1600×900, Pinterest 1000×1500 and Full HD.</p></details>
+          <details><summary>What is the difference between Fill and Fit?</summary><p>Fill crops the image to fill the whole frame. Fit keeps the whole image and fills the empty space with a soft blurred copy.</p></details>
+          <details><summary>How does the file size limit work?</summary><p>Quality is lowered only as much as needed to stay under the limit, and the picture is made smaller only if that is not enough.</p></details>
+          <details><summary>Is it free and private?</summary><p>Yes. It is free, needs no account, and your images never leave your device.</p></details>
+        </div>
+      </section><!--/seo:content-->
   </dialog>
 
   <dialog id="info" class="info">

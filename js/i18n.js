@@ -55,6 +55,7 @@
     'notice': 'For <b>your own AI images</b> only. Stock-photo watermarks (Shutterstock, Getty, iStock, Adobe Stock…) are not supported.',
     'link.fair': 'Fair use',
     'link.privacy': 'Privacy',
+    'link.faq': 'FAQ',
     'link.report': 'Report a problem',
     'feat1.t': 'Finds every logo',
     'feat1.p': 'Scans every size and position, catches a second logo left over from an earlier edit, and cleans every frame of a video.',

@@ -107,11 +107,15 @@
   function makeCompare(box, opts) {
     opts = opts || {};
     const after = box.querySelector('.after'), divider = box.querySelector('.divider');
+    const before = box.querySelector('canvas:not(.after)');
     const HANDLE = 28; // px around the divider that grab the slider
     let down = null, pct = 50;
     const set = (v) => {
       pct = v;
       after.style.clipPath = `inset(0 0 0 ${v}%)`;
+      // cut the "before" image at the divider too, so it never shows through
+      // transparent parts of the result (e.g. after removing the background)
+      if (before) before.style.clipPath = `inset(0 ${100 - v}% 0 0)`;
       divider.style.left = v + '%';
     };
     const slideTo = (e) => {
