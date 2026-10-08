@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unsparkle: remove AI image watermarks, erase objects, upscale to 4K</title>
+  <meta name="description" content="Remove the sparkle logo from your AI images, erase objects and upscale to HD or 4K. Free, open source, no sign-up, and 100% in your browser: images never leave your device." />
+  <meta name="theme-color" content="#0b0d17" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+
+  <!-- share previews (WhatsApp, X, LinkedIn, Facebook) -->
+  <link rel="canonical" href="https://meetdhamsania013.github.io/unsparkle/" />
+  <meta property="og:url" content="https://meetdhamsania013.github.io/unsparkle/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Unsparkle" />
+  <meta property="og:title" content="Unsparkle: Remove the sparkle. Keep the magic." />
+  <meta property="og:description" content="Remove AI image watermarks, erase objects and upscale to 4K. Free, private, runs in your browser." />
+  <meta property="og:image" content="https://meetdhamsania013.github.io/unsparkle/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Unsparkle: Remove the sparkle. Keep the magic." />
+  <meta name="twitter:description" content="Remove AI image watermarks, erase objects and upscale to 4K. Free, private, runs in your browser." />
+  <meta name="twitter:image" content="https://meetdhamsania013.github.io/unsparkle/assets/og-image.png" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Unsparkle","applicationCategory":"MultimediaApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Remove the sparkle logo from your own AI images, erase objects and upscale to HD or 4K, privately in your browser."}
+  </script>
+
+  <!-- Privacy lock: the page may only load its own files plus the AI engine code from jsDelivr,
+       and can't send data anywhere else. Images can't leave the device even if the code had a bug. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob: https://cdn.jsdelivr.net 'wasm-unsafe-eval'; connect-src 'self' https://cdn.jsdelivr.net; img-src 'self' data: blob:; style-src 'self'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><canvas id="magic"></canvas></div>
+
+  <header class="nav">
+    <a class="brand" href="./">
+      <img src="assets/logo.svg" alt="" width="34" height="34" />
+      <span>Unsparkle</span>
+    </a>
+    <div class="nav-right">
+      <button id="installBtn" class="chip chip-link" data-i18n="nav.install" hidden>⬇ Install app</button>
+      <button class="chip chip-link" data-info="privacy" data-i18n="nav.private">🔒 Private</button>
+      <a class="chip chip-link" href="#" target="_blank" rel="noopener" id="repoLink" data-i18n="nav.os">★ Open source</a>
+      <button id="themeBtn" class="chip chip-link" title="Theme">◐ Auto</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- landing -->
+    <section id="landing" class="landing">
+      <div class="hero">
+        <div class="eyebrow" data-i18n="hero.eyebrow">Free · No sign-up · Runs on your device</div>
+        <h1 data-i18n-html="hero.title">Remove the sparkle.<br /><span class="grad">Keep the magic.</span></h1>
+        <p class="lead" data-i18n="hero.lead">Drop an AI image. The corner logo is found and erased, the real background is restored, and you can upscale to HD or 4K with one click.</p>
+      </div>
+
+      <label id="dropzone" class="drop">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+        <div class="drop-art" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="56" height="56"><path d="M32 4C33 25 39 31 60 32C39 33 33 39 32 60C31 39 25 33 4 32C25 31 31 25 32 4Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="4 3"/></svg>
+        </div>
+        <div class="drop-title" data-i18n="drop.title">Drop your images here</div>
+        <div class="drop-sub" data-i18n-html="drop.sub">one or many · or <u>browse</u> · paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> · PNG, JPG, WebP</div>
+      </label>
+
+      <div id="blocked" class="blocked" role="alert" hidden>
+        <div class="blocked-ico">⛔</div>
+        <div>
+          <h3 data-i18n="blocked.title">We can't process this image</h3>
+          <p id="blockedMsg"></p>
+          <p class="hint" data-i18n="blocked.hint"></p>
+        </div>
+      </div>
+
+      <p class="notice">
+        <span data-i18n-html="notice"></span>
+        <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> · <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button>
+      </p>
+
+      <div class="features">
+        <div class="feature"><div class="f-ico">◎</div><h3 data-i18n="feat1.t"></h3><p data-i18n="feat1.p"></p></div>
+        <div class="feature"><div class="f-ico">◐</div><h3 data-i18n="feat2.t"></h3><p data-i18n="feat2.p"></p></div>
+        <div class="feature"><div class="f-ico">⤢</div><h3 data-i18n="feat3.t"></h3><p data-i18n="feat3.p"></p></div>
+      </div>
+    </section>
+
+    <!-- working -->
+    <section id="busy" class="busy" hidden>
+      <div class="orbit"><span></span></div>
+      <div id="busyMsg"></div>
+    </section>
+
+    <!-- batch: many images at once -->
+    <section id="batch" class="batch" hidden>
+      <div class="batch-head">
+        <div>
+          <h2 id="batchTitle"></h2>
+          <div id="batchSummary" class="hint"></div>
+        </div>
+        <div class="batch-actions">
+          <label class="ghost-btn" for="fileInput" data-i18n="batch.add">＋ Add more</label>
+          <button id="batchClear" class="ghost-btn" data-i18n="batch.clear">Clear all</button>
+          <button id="zipBtn" class="cta small-cta" data-i18n="batch.zip">⬇ Download all (ZIP)</button>
+        </div>
+      </div>
+      <div id="toast" class="toast" role="status" hidden></div>
+      <div id="batchBar" class="bar" hidden><span id="batchBarFill"></span></div>
+      <div id="batchGrid" class="batch-grid"></div>
+      <p class="hint center" data-i18n="batch.hint"></p>
+    </section>
+
+    <!-- result -->
+    <section id="result" class="result" hidden>
+      <div class="editor-top">
+        <button id="backBtn" class="back" hidden><span class="ic">←</span><span id="backLabel"></span></button>
+        <button id="saveBackBtn" class="save-back" hidden>
+          <span class="ic">✓</span>
+          <span class="txt"><b data-i18n="save.backTitle">Save changes</b><small data-i18n="save.backSub">and go back to all images</small></span>
+        </button>
+      </div>
+      <ol class="steps">
+        <li id="step1" class="done"><span>1</span><b data-i18n="step.clean">Clean</b></li>
+        <li id="step2"><span>2</span><b data-i18n-html="step.upscale">Upscale <em>(optional)</em></b></li>
+        <li id="step3"><span>3</span><b data-i18n="step.download">Download</b></li>
+      </ol>
+
+      <div id="status" class="status"></div>
+
+      <div class="grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="panel.full">Full image</h2>
+            <div class="toolbar">
+              <button id="brushBtn" class="tool" data-i18n="tool.erase">🖌 Erase</button>
+              <button id="cropBtn" class="tool" data-i18n="tool.crop">✂ Crop</button>
+              <button id="undoBtn" class="tool" data-i18n="tool.undo" disabled>↶ Undo</button>
+              <div class="seg" role="group" aria-label="Zoom">
+                <button data-zoom="1" class="active" data-i18n="zoom.fit">Fit</button><button data-zoom="2">2×</button><button data-zoom="4">4×</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="brushBar" class="toolbar-row" hidden>
+            <span class="hint" data-i18n="brush.hint"></span>
+            <label class="size"><span data-i18n="brush.size">Size</span> <input id="brushSize" type="range" min="6" max="160" value="36" /></label>
+            <button id="brushClear" class="tool" data-i18n="brush.clear">Clear</button>
+            <button id="brushApply" class="tool primary-tool" data-i18n="brush.apply" disabled>✨ Erase</button>
+            <button id="brushDone" class="tool" data-i18n="brush.done">Done</button>
+          </div>
+          <div id="cropBar" class="toolbar-row" hidden>
+            <div class="seg" role="group" aria-label="Crop ratio">
+              <button data-ratio="free" class="active" data-i18n="crop.free">Free</button><button data-ratio="1">1:1</button><button data-ratio="0.8">4:5</button><button data-ratio="1.7778">16:9</button><button data-ratio="0.5625">9:16</button>
+            </div>
+            <span id="cropSize" class="hint"></span>
+            <button id="cropCancel" class="tool" data-i18n="crop.cancel">Cancel</button>
+            <button id="cropApply" class="tool primary-tool" data-i18n="crop.apply">✓ Apply crop</button>
+          </div>
+
+          <div id="viewport" class="viewport">
+          <div id="compare" class="compare">
+            <canvas id="beforeCanvas"></canvas>
+            <canvas id="afterCanvas" class="after"></canvas>
+            <div id="spot" class="spot" hidden></div>
+            <div class="divider"><span>⟷</span></div>
+            <div id="tagBefore" class="tag tag-l"></div>
+            <div id="tagAfter" class="tag tag-r"></div>
+            <canvas id="paintCanvas" class="paint"></canvas>
+            <div id="brushCursor" class="brush-cursor" hidden></div>
+            <div id="cropBox" class="crop-box" hidden>
+              <span data-h="nw"></span><span data-h="ne"></span><span data-h="sw"></span><span data-h="se"></span>
+            </div>
+
+            <!-- shown while upscaling or erasing: the image updates underneath -->
+            <div id="upOverlay" class="up-overlay" hidden>
+              <div id="tileCursor" class="tile-cursor"></div>
+              <div class="up-card">
+                <div class="ring">
+                  <svg viewBox="0 0 44 44"><circle class="track" cx="22" cy="22" r="19" /><circle id="ringArc" class="arc" cx="22" cy="22" r="19" /></svg>
+                  <b id="upPct">0%</b>
+                </div>
+                <div class="up-text"><b id="upTitle"></b><span id="upSub"></span></div>
+                <button id="upCancel" class="ghost small-btn" data-i18n="work.cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+          </div>
+          <p id="viewHint" class="hint center"></p>
+        </div>
+
+        <div class="side">
+          <div class="panel">
+            <div class="panel-head">
+              <h2 data-i18n="panel.closeup">Close-up</h2>
+              <div class="zoom-tools">
+                <span id="zoomMode" class="hint"></span>
+                <div class="seg" role="group" aria-label="Close-up zoom">
+                  <button id="zoomOut" title="Zoom out">−</button><button id="zoomIn" title="Zoom in">+</button>
+                </div>
+              </div>
+            </div>
+            <div id="zoomCompare" class="compare zoom">
+              <canvas id="zoomBefore"></canvas>
+              <canvas id="zoomAfter" class="after"></canvas>
+              <div class="divider"><span>⟷</span></div>
+              <div id="capBefore" class="tag tag-l"></div>
+              <div id="capAfter" class="tag tag-r"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2 data-i18n="panel.upscale">Upscale with AI</h2><span id="engine" class="hint"></span></div>
+            <div class="seg wide two" role="group" aria-label="Image type">
+              <button data-model="photo" class="active" data-i18n="model.photo">📷 Photo</button><button data-model="art" data-i18n="model.art">🎨 Art / Anime</button>
+            </div>
+            <p class="hint model-hint" data-i18n="model.hint">Photo: real photos, people, products · Art: drawings, anime, cartoons, logos</p>
+            <div class="options">
+              <button id="up2Btn" class="option"><b>HD 2×</b><small id="up2Size"></small></button>
+              <button id="up4kBtn" class="option"><b>4K</b><small id="up4kSize"></small></button>
+            </div>
+            <div id="upProgress" class="progress" hidden>
+              <div class="bar"><span id="upBar"></span></div>
+              <div id="upMsg" class="hint"></div>
+            </div>
+          </div>
+
+          <div class="panel save">
+            <div class="panel-head"><h2 data-i18n="panel.save">Save as</h2><span id="dlSize" class="hint"></span></div>
+            <label class="name-field">
+              <span data-i18n="save.name">File name</span>
+              <span class="name-box"><input id="fileName" type="text" spellcheck="false" autocomplete="off" /><b id="fileExt">.png</b></span>
+            </label>
+            <div class="seg wide" role="group" aria-label="File format">
+              <button data-format="image/png">PNG</button><button data-format="image/jpeg">JPG</button><button data-format="image/webp">WebP</button>
+            </div>
+            <div class="save-row">
+              <button id="downloadBtn" class="cta"><span data-i18n="save.download">⬇ Download</span> <small id="dlInfo"></small></button>
+              <button id="copyBtn" class="tool copy" data-i18n="save.copy" hidden>📋 Copy</button>
+            </div>
+          </div>
+          <button id="againBtn" class="ghost" data-i18n="again">↺ Start over with another image</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>
+      <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button> ·
+      <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> ·
+      <span data-report-wrap><a class="linklike" href="#" data-report data-i18n="link.report">Report a problem</a> ·</span>
+      <span data-i18n-html="footer"></span>
+    </p>
+  </footer>
+
+  <dialog id="upConfirm" class="info confirm">
+    <div class="confirm-ico">⤢</div>
+    <h2 id="ucTitle"></h2>
+    <p id="ucSize" class="big-size"></p>
+    <ul class="facts compact">
+      <li id="ucModel"></li>
+      <li id="ucTime"></li>
+      <li data-i18n="confirm.ai"></li>
+      <li data-i18n="confirm.tab"></li>
+      <li id="ucLimit" data-i18n="confirm.limit" hidden></li>
+    </ul>
+    <div class="confirm-actions">
+      <button id="ucCancel" class="ghost" data-i18n="confirm.no">Not now</button>
+      <button id="ucStart" class="cta" data-i18n="confirm.start">Start upscaling</button>
+    </div>
+  </dialog>
+
+  <dialog id="leaveDialog" class="info confirm">
+    <div class="confirm-ico">✏️</div>
+    <h2 data-i18n="leave.title">Save your changes?</h2>
+    <p class="hint" data-i18n="leave.text">You edited this image. Save the changes before going back to all images?</p>
+    <div class="confirm-actions three">
+      <button id="leaveStay" class="ghost" data-i18n="leave.stay">Keep editing</button>
+      <button id="leaveDiscard" class="ghost" data-i18n="leave.discard">Discard</button>
+      <button id="leaveSave" class="cta" data-i18n="leave.save">Save changes</button>
+    </div>
+  </dialog>
+
+  <dialog id="info" class="info">
+    <form method="dialog"><button class="close" aria-label="Close">✕</button></form>
+    <section data-panel="privacy">
+      <h2 data-i18n="privacy.title"></h2>
+      <ul class="facts">
+        <li data-i18n-html="privacy.1"></li>
+        <li data-i18n-html="privacy.2"></li>
+        <li data-i18n-html="privacy.3"></li>
+        <li data-i18n-html="privacy.4"></li>
+        <li data-i18n-html="privacy.5"></li>
+      </ul>
+      <p class="hint" data-i18n="privacy.note"></p>
+    </section>
+    <section data-panel="fair">
+      <h2 data-i18n="fair.title"></h2>
+      <p data-i18n-html="fair.intro"></p>
+      <ul class="facts">
+        <li class="ok-li" data-i18n="fair.ok"></li>
+        <li class="no-li" data-i18n="fair.no1"></li>
+        <li class="no-li" data-i18n="fair.no2"></li>
+        <li class="no-li" data-i18n="fair.no3"></li>
+      </ul>
+      <p class="hint" data-i18n="fair.note"></p>
+    </section>
+  </dialog>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/guard.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/work.js"></script>
+  <script src="js/zip.js"></script>
+  <script src="js/upscale.js"></script>
+  <script src="js/fill.js"></script>
+  <script src="js/eraser.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/prefs.js"></script>
+  <script src="js/magic.js"></script>
+</body>
+</html>

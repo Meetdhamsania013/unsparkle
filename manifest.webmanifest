@@ -1,0 +1,16 @@
+{
+  "name": "Unsparkle: AI watermark remover & upscaler",
+  "short_name": "Unsparkle",
+  "description": "Remove the sparkle logo from your AI images, erase objects and upscale to HD or 4K. Free, private, runs in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d17",
+  "theme_color": "#0b0d17",
+  "categories": ["photo", "utilities", "productivity"],
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
