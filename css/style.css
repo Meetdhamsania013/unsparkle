@@ -303,6 +303,33 @@ kbd {
   .save-back, .save-back::after { animation: none; }
 }
 
+/* video screen */
+.vview { display: grid; gap: 16px; }
+.vhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.vhead h2 { font-size: 20px; word-break: break-all; }
+.vstage {
+  position: relative; width: min(100%, calc(66vh * var(--ar, 1.7778))); margin: 0 auto; border-radius: 14px; overflow: hidden;
+  background: #000; user-select: none; touch-action: none;
+}
+.vstage video { display: block; width: 100%; height: auto; }
+.vstage .after { position: absolute; inset: 0; height: 100%; clip-path: inset(0 0 0 50%); }
+.vstage.compared { cursor: ew-resize; }
+.vstage.brush { cursor: none; }
+.vlayer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vlayer.paint { opacity: 0.5; pointer-events: none; }
+.vspot {
+  position: absolute; border: 2px solid var(--cyan); border-radius: 8px; pointer-events: none;
+  box-shadow: 0 0 14px var(--cyan); animation: blink 1.6s ease-in-out infinite;
+}
+.vstage.compared .vspot, .vstage.brush .vspot { display: none; }
+@keyframes blink { 50% { opacity: 0.35; } }
+.vcontrols { display: flex; align-items: center; gap: 10px; }
+.vcontrols input { flex: 1; accent-color: var(--violet); }
+.vplay {
+  width: 40px; height: 40px; border-radius: 50%; border: 0; color: #fff; font-size: 14px; flex: none;
+  background: var(--grad); box-shadow: 0 6px 18px -6px var(--violet);
+}
+
 /* magic sparkles behind the home page */
 #magic { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s; }
 #magic.on { opacity: 1; }

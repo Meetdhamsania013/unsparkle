@@ -252,6 +252,73 @@
     return best;
   }
 
+  // Fallback for screenshots, resized or cropped images: the logo is no longer
+  // at a standard Gemini spot (often smaller, with uneven gaps), so search the
+  // lower-right part of the picture at any size and position. Only used when
+  // detect() finds nothing; it demands a stronger match to avoid false alarms.
+  const ANYWHERE_GAIN = { classic: [0.45, 1.15], '96-20260520': [0.8, 1.35] };
+  const ANYWHERE_MIN = 26;
+  function detectAnywhere(img) {
+    const { width: w, height: h } = img;
+    const extent = Math.round(Math.max(w, h) * 0.55);
+    const C = cornerLuminance(img, extent);
+    const { ew, eh } = C;
+    Object.assign(C, gradients(C.L, ew, eh));
+    const maxSize = Math.min(110, Math.floor(Math.min(ew, eh) / 2));
+    if (maxSize < ANYWHERE_MIN) return { found: false, score: 0 };
+
+    // coarse scan with the standard mask
+    const hits = [];
+    for (let size = ANYWHERE_MIN; size <= maxSize; size += 5) {
+      const M = maskGradients('classic', size);
+      const step = Math.max(3, Math.round(size / 10));
+      for (let y = 0; y + size <= eh; y += step) {
+        for (let x = 0; x + size <= ew; x += step) {
+          const score = edgeScore(C, M, size, x, y, 2);
+          if (score > 0.3) hits.push({ size, x, y, score });
+        }
+      }
+    }
+    hits.sort((a, b) => b.score - a.score);
+    const seeds = [];
+    for (const hit of hits) {
+      if (seeds.length >= 8) break;
+      if (!seeds.some((t) => Math.abs(t.x - hit.x) < hit.size / 2 && Math.abs(t.y - hit.y) < hit.size / 2)) seeds.push(hit);
+    }
+
+    let best = null;
+    for (const seed of seeds) {
+      let top = null;
+      for (const variant of Object.keys(ANYWHERE_GAIN)) {
+        for (let size = seed.size - 3; size <= seed.size + 3; size++) {
+          if (size < ANYWHERE_MIN || size > maxSize) continue;
+          const M = maskGradients(variant, size);
+          const cx = seed.x + (seed.size - size) / 2, cy = seed.y + (seed.size - size) / 2;
+          for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 3; dx++) {
+              const x = Math.round(cx + dx), y = Math.round(cy + dy);
+              if (x < 0 || y < 0 || x + size > ew || y + size > eh) continue;
+              const score = edgeScore(C, M, size, x, y, 1);
+              if (!top || score > top.score) top = { variant, size, x, y, score };
+            }
+          }
+        }
+      }
+      if (!top) continue;
+      const place = { size: top.size, x: top.x + C.ox, y: top.y + C.oy };
+      const alpha = getMask(top.variant, top.size);
+      const ev = evaluate(img, place, alpha);
+      const rg = robustGain(img, place, alpha);
+      const [gLo, gHi] = ANYWHERE_GAIN[top.variant];
+      // both opacity estimates must look like a real logo
+      const ok = top.score >= 0.65 && ev.gain >= gLo && ev.gain <= gHi && rg != null && rg >= gLo && rg <= gHi;
+      if (ok && (!best || top.score > best.score)) {
+        best = Object.assign({}, place, { variant: top.variant, score: top.score, gain: ev.gain, known: false, found: true, anywhere: true });
+      }
+    }
+    return best || { found: false, score: 0 };
+  }
+
   // Same correlation for an arbitrary box (used to measure leftovers).
   function boxEdgeScore(img, place, alpha) {
     const { width: w, data } = img;
@@ -618,8 +685,12 @@
   // detect → reverse alpha with fitted opacity → fill pixels that can't be
   // recovered → if the logo is still visible, fill the whole logo shape from
   // the surrounding background.
-  function removeOnce(img) {
-    const det = detect(img);
+  function removeOnce(img, allowAnywhere) {
+    let det = detect(img);
+    if (!det.found && allowAnywhere !== false) {
+      const any = detectAnywhere(img); // screenshots / resized images
+      if (any.found) det = any;
+    }
     if (!det.found) return { found: false, score: det.score, image: cloneImage(img) };
 
     const place = { x: det.x, y: det.y, size: det.size };
@@ -650,7 +721,7 @@
     const logos = [];
     let image = img, first = null, lastScore = 0;
     while (logos.length < maxLogos) {
-      const res = removeOnce(image);
+      const res = removeOnce(image, logos.length === 0); // screenshot search only for the first logo
       lastScore = res.score;
       if (!res.found) break;
       // same spot found again means it's already as clean as we can get it
@@ -663,7 +734,40 @@
     return Object.assign({}, first, { image, logos });
   }
 
+  // Same removal steps as removeOnce, at a position that is already known.
+  // Used for video: the logo is found once and sits at the same spot in every
+  // frame. The final "fill the whole logo" step is optional because switching it
+  // on for some frames and not others would flicker.
+  function removeAt(img, place, variant, gain, opts) {
+    // maxAlpha: where the logo is more opaque than this, recovering the pixel
+    // amplifies noise (video compression) too much, so it is filled instead
+    opts = Object.assign({ allowFill: false, maxAlpha: 0.9 }, opts);
+    const alpha = getMask(variant, place.size);
+    const res = reverseAlpha(img, place, alpha, gain);
+    let image = res.image;
+    let unreliable = res.unreliable;
+    if (opts.maxAlpha < 0.9) {
+      for (let ty = 0; ty < place.size; ty++) {
+        for (let tx = 0; tx < place.size; tx++) {
+          if (alpha[ty * place.size + tx] * gain < opts.maxAlpha) continue;
+          const px = place.x + tx, py = place.y + ty;
+          if (px >= 0 && py >= 0 && px < img.width && py < img.height && !res.bad[py * img.width + px]) {
+            res.bad[py * img.width + px] = 1;
+            unreliable++;
+          }
+        }
+      }
+    }
+    if (unreliable) image = inpaint(image, res.bad, { grow: 1, grain: false });
+    image = cleanupOutline(image, place, alpha).image;
+    if (opts.allowFill && Math.abs(residualScore(image, place, alpha)) > 0.25) {
+      image = inpaint(image, logoMask(img, place, alpha, gain, 0.03), { grow: 2 });
+    }
+    return image;
+  }
+
   return {
-    process, removeOnce, detect, evaluate, boxEdgeScore, robustGain, reverseAlpha, residualScore, inpaint, getMask, resizeMask, cloneImage, dilate, logoMask,
+    process, removeOnce, removeAt, detect, detectAnywhere, evaluate, boxEdgeScore, robustGain, reverseAlpha, residualScore, inpaint, getMask, resizeMask, cloneImage, dilate, logoMask,
+    cleanupOutline,
   };
 });

@@ -8,6 +8,7 @@ Remove the corner logo from your AI images and upscale them to HD or 4K. Free, o
 ## Features
 - **One click:** drop an image and the logo is found, removed, and the background restored.
 - **Finds every logo:** scans the corner at every size and position, and also removes a second, older logo left over from an earlier edit.
+- **Video:** removes the Gemini/Veo logo from every frame automatically (logo found on an average of many frames, so no flicker), plus a brush for fixed logos or text. Keeps resolution, frame rate and the original sound. MP4 out (WebM if the browser can't encode MP4).
 - **Batch mode:** drop many images at once. They're cleaned in the background, then **Download all (ZIP)**; click any one to edit it.
 - **AI upscaling:** HD 2× or 4K with Real-ESRGAN in the browser, with a **Photo** or **Art/Anime** model (GPU via WebGPU, multi-core CPU fallback). It asks first, shows the estimated time, and can be cancelled. Phones get a safe size limit.
 - **Save as** PNG, JPG or WebP with the file size shown, or **copy to clipboard**.
@@ -51,6 +52,8 @@ Tests: `npm test`
 - Logo alpha masks from [gemini-watermark-remover](https://github.com/GargantuaX/gemini-watermark-remover), MIT
 - [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) models (general-x4v3, animevideov3), BSD-3-Clause
 - [MI-GAN](https://github.com/Picsart-AI-Research/MI-GAN) inpainting model, MIT
+- [Mediabunny](https://github.com/Vanilagy/mediabunny) video reading/writing, MPL-2.0 (unmodified)
+- [onnxruntime-web](https://github.com/microsoft/onnxruntime) AI engine, MIT (loaded from jsDelivr)
 - Fonts: Inter and Space Grotesk, SIL Open Font License (`assets/fonts`)
 - See `LICENSE-THIRD-PARTY`
 

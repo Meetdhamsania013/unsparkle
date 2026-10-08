@@ -52,7 +52,9 @@
     el.batch.hidden = view !== 'batch';
     el.busy.hidden = view !== 'busy';
     el.result.hidden = view !== 'result';
+    $('videoView').hidden = view !== 'video';
   }
+  window.WMApp = { show: (v) => show(v), resetAll: () => resetAll(), toast: (t) => showToast(t) };
 
   function canvasFrom(imgData) {
     const cv = document.createElement('canvas');
@@ -353,7 +355,21 @@
   }
 
   async function handleFiles(list) {
-    const files = [...list].filter((f) => f && f.type && f.type.startsWith('image/'));
+    const all = [...list].filter(Boolean);
+    const videos = all.filter((f) => f.type && f.type.startsWith('video/'));
+    // a single video opens the video screen
+    if (videos.length && !state.busy && items.length === 0 && all.length === 1) {
+      const verdict = await WMGuard.check(videos[0]);
+      if (!verdict.ok) {
+        $('blockedMsg').textContent = tr(verdict.where === 'name' ? 'blocked.byName' : 'blocked.byMeta', { agency: verdict.agency });
+        $('blocked').hidden = false;
+        return;
+      }
+      $('blocked').hidden = true;
+      return WMVideoUI.open(videos[0]);
+    }
+    if (videos.length) setTimeout(() => showToast(tr('video.onlyOne')), 300);
+    const files = all.filter((f) => f.type && f.type.startsWith('image/'));
     if (!files.length || state.busy) return;
     const startedEmpty = items.length === 0;
     const added = [];
