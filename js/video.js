@@ -63,10 +63,12 @@
     // average of evenly spaced frames
     const sink = new mb.CanvasSink(vt, { poolSize: 1 });
     const sum = new Float32Array(W * H * 3);
-    let n = 0, preview = null;
-    for (let i = 0; i < SAMPLE_FRAMES; i++) {
-      const t = (duration * (i + 0.5)) / SAMPLE_FRAMES;
-      const wc = await sink.getCanvas(t);
+    let n = 0, preview = null, i = -1;
+    // one pass over sorted timestamps: the decoder keeps going instead of
+    // restarting from a keyframe for every sample (much faster than seeking)
+    const times = Array.from({ length: SAMPLE_FRAMES }, (_, k) => (duration * (k + 0.5)) / SAMPLE_FRAMES);
+    for await (const wc of sink.canvasesAtTimestamps(times)) {
+      i++;
       if (!wc) continue;
       const d = wc.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
       for (let p = 0, q = 0; p < d.length; p += 4, q += 3) { sum[q] += d[p]; sum[q + 1] += d[p + 1]; sum[q + 2] += d[p + 2]; }
@@ -198,6 +200,13 @@
     // a few canvases in rotation so the encoder can still read the previous frame
     const pool = [canvasOf(W, H), canvasOf(W, H), canvasOf(W, H)];
     let poolIdx = 0;
+    // Only the small boxes around the logo / painted areas are read back to the
+    // CPU; the full frame stays on the graphics card (reading whole frames was
+    // the slow part).
+    const boxes = regions.map((r) => {
+      const c = canvasOf(r.w, r.h);
+      return { c, ctx: c.getContext('2d', { willReadFrequently: true }) };
+    });
 
     const conversion = await mb.Conversion.init({
       input,
@@ -209,11 +218,13 @@
         keyFrameInterval: 2,
         process: async (sample) => {
           const cv = pool[poolIdx++ % pool.length];
-          const ctx = cv.getContext('2d', { willReadFrequently: true });
+          const ctx = cv.getContext('2d');
           sample.draw(ctx, 0, 0, W, H);
           for (let i = 0; i < regions.length; i++) {
-            const r = regions[i];
-            let img = ctx.getImageData(r.x, r.y, r.w, r.h);
+            const r = regions[i], box = boxes[i];
+            box.ctx.clearRect(0, 0, r.w, r.h);
+            box.ctx.drawImage(cv, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+            let img = box.ctx.getImageData(0, 0, r.w, r.h);
             if (r.kind === 'logo') {
               const place = { x: plan.logo.x - r.x, y: plan.logo.y - r.y, size: plan.logo.size };
               const out = root.WMCore.removeAt(img, place, plan.logo.variant, plan.logo.gain, { maxAlpha: 0.6 });
@@ -221,7 +232,8 @@
             } else if (models[i]) {
               img = applyOverlay(img, models[i]);
             }
-            ctx.putImageData(img, r.x, r.y);
+            box.ctx.putImageData(img, 0, 0);
+            ctx.drawImage(box.c, r.x, r.y);
           }
           return cv;
         },
