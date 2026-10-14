@@ -72,6 +72,7 @@
     'batch.zip': '⬇ Download all (ZIP)',
     'batch.preparing': 'Preparing {k} / {n}…',
     'batch.zipping': 'Zipping…',
+    'batch.zipReady': '✓ ZIP ready – click to save',
     'batch.hint': 'Click an image to compare, erase, crop or upscale it. Your edits are kept in the ZIP.',
     'batch.cleaned': '{n} cleaned',
     'batch.none': '{n} without a logo',

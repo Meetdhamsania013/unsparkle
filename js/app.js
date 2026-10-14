@@ -486,6 +486,7 @@
     el.batchBar.hidden = !counts.left;
     el.batchBarFill.style.width = total ? ((total - counts.left) / total) * 100 + '%' : '0%';
     el.zipBtn.disabled = !ready || !!counts.left;
+    clearZipReady(); // the images or their edits may have changed
 
     el.batchGrid.textContent = '';
     for (const item of items) {
@@ -545,11 +546,24 @@
     toastTimer = setTimeout(() => (el.toast.hidden = true), 3500);
   }
 
+  // A ZIP that took long to build is no longer tied to the click, so the
+  // browser may block the download; it then waits for a second click.
+  let zipReady = null;
+  function clearZipReady() {
+    zipReady = null;
+    el.zipBtn.classList.remove('ready');
+    el.zipBtn.textContent = tr('batch.zip');
+  }
+
   el.zipBtn.addEventListener('click', async () => {
+    if (zipReady) {
+      saveBlob(zipReady.blob, zipReady.name);
+      return clearZipReady();
+    }
     const ready = items.filter((i) => i.clean);
     if (!ready.length) return;
     el.zipBtn.disabled = true;
-    const label = el.zipBtn.textContent;
+    const started = performance.now();
     try {
       const files = [];
       for (let k = 0; k < ready.length; k++) {
@@ -563,9 +577,21 @@
         files.push({ name: `${item.outName || item.name}.${extOf(blob.type)}`, blob });
       }
       el.zipBtn.textContent = tr('batch.zipping');
-      saveBlob(await WMZip.zip(files), `unsparkle-${files.length}-images.zip`);
+      const blob = await WMZip.zip(files), name = `unsparkle-${files.length}-images.zip`;
+      const ua = navigator.userActivation;
+      if (ua ? ua.isActive : performance.now() - started < 4000) {
+        saveBlob(blob, name);
+      } else {
+        zipReady = { blob, name };
+      }
     } finally {
-      el.zipBtn.textContent = label;
+      const keep = zipReady;
+      clearZipReady();
+      if (keep) {
+        zipReady = keep;
+        el.zipBtn.classList.add('ready');
+        el.zipBtn.textContent = tr('batch.zipReady');
+      }
       el.zipBtn.disabled = false;
     }
   });

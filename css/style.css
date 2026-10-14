@@ -239,6 +239,7 @@ kbd {
 }
 .ghost-btn:hover { border-color: var(--violet); }
 .small-cta { display: inline-flex; font-size: 15px; padding: 10px 16px; }
+.small-cta.ready { box-shadow: 0 0 0 3px var(--ok); }
 .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
 .card {
   position: relative; display: grid; gap: 8px; padding: 10px; border-radius: 16px; cursor: pointer; text-align: left;
