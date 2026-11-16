@@ -8,6 +8,7 @@
   'use strict';
 
   const en = {
+    'nav.tag': '🏷 AI tag remover',
     'nav.private': '🔒 Private',
     'nav.os': '★ Open source',
     'nav.install': '⬇ Install app',

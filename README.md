@@ -31,7 +31,7 @@ Upscaling loads the onnxruntime-web engine from jsDelivr, so the first upscale n
 > 2. Once you know your site URL, make `og:image` / `twitter:image` in `index.html` absolute (e.g. `https://unsparkle.app/assets/og-image.png`) so share previews work everywhere.
 > 3. On every release, bump `VERSION` in `sw.js` so installed copies update.
 >
-> **Best host:** Cloudflare Pages or Netlify. They apply `_headers`, which enables the strict security policy and **multi-core AI (about 2.3× faster upscaling)**. GitHub Pages works too, just without those headers.
+> **Best host:** Cloudflare Pages or Netlify. They apply `_headers`, which enables the strict security policy and **multi-core AI (about 2.3× faster upscaling)**. GitHub Pages works too: the service worker adds the isolation headers itself from the second page load on.
 
 ## SEO pages
 `node tools/seo-pages.js` builds the landing pages from `index.html`. Each is the full tool with its own title, description, heading, how-to steps, FAQ and structured data:

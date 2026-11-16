@@ -167,5 +167,10 @@
     return { image: out, method: 'ai' };
   }
 
-  root.WMEraser = { erase };
+  /** Start loading the eraser model in the background (while the user paints). */
+  function warm() {
+    getSession(() => {}).catch(() => { /* reported when used */ });
+  }
+
+  root.WMEraser = { erase, warm };
 })(window);

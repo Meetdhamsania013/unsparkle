@@ -4,7 +4,7 @@
  * are cached the first time they're used. Images are never cached or stored.
  * Bump VERSION on every release so visitors get the new files.
  */
-const VERSION = 'unsparkle-v8';
+const VERSION = 'unsparkle-v9';
 const SHELL = [
   './',
   'index.html',
@@ -18,8 +18,19 @@ const SHELL = [
 ];
 const RUNTIME = [/\/js\/models\//, /^https:\/\/cdn\.jsdelivr\.net\/npm\/onnxruntime-web@/];
 
+// GitHub Pages can't send custom headers, so the page is made cross-origin
+// isolated here. That lets the AI tools (upscale, erase, background) use every
+// CPU core instead of one: about 2-3x faster when there's no usable GPU.
+function isolate(req, res) {
+  if (!res || req.mode !== 'navigate' || res.type === 'opaque' || res.status === 0) return res;
+  const h = new Headers(res.headers);
+  h.set('Cross-Origin-Opener-Policy', 'same-origin');
+  h.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+}
+
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -50,15 +61,17 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   // app shell: network first so updates show up, cache when offline
+  // no-cache: always check the server (a quick 304 when unchanged), so a new
+  // release never mixes fresh and stale files from the browser's own cache
   e.respondWith(
-    fetch(req)
+    (req.mode === 'navigate' ? fetch(req) : fetch(req, { cache: 'no-cache' }))
       .then((res) => {
         if (res.ok) {
           const copy = res.clone(); // copy now, before the page reads the body
           caches.open(VERSION).then((c) => c.put(req, copy));
         }
-        return res;
+        return isolate(req, res);
       })
-      .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || caches.match('index.html'))),
+      .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => isolate(req, hit) || caches.match('index.html').then((r) => isolate(req, r)))),
   );
 });

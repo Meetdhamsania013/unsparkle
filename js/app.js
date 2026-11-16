@@ -997,6 +997,7 @@
     $('ucLimit').hidden = !t.limited;
     upConfirm.dataset.choice = choice;
     upConfirm.showModal();
+    if (WMUpscale.warm) WMUpscale.warm(state.upModel); // the model loads while the user reads the dialog
   }
   $('ucCancel').addEventListener('click', () => upConfirm.close());
   $('ucStart').addEventListener('click', () => {
@@ -1212,6 +1213,7 @@
     if (state.mode === 'brush') { clearPaint(); return setMode('compare'); }
     setMode('brush');
     clearPaint();
+    if (WMEraser.warm) WMEraser.warm(); // the AI loads while the user paints
   });
   el.brushDone.addEventListener('click', () => { clearPaint(); setMode('compare'); });
   el.brushClear.addEventListener('click', clearPaint);
