@@ -8,6 +8,7 @@
   'use strict';
 
   const en = {
+    'nav.home': '✦ Watermark remover',
     'nav.tag': '🏷 AI tag remover',
     'nav.private': '🔒 Private',
     'nav.os': '★ Open source',
@@ -109,6 +110,7 @@
     'tag.dropTitle': 'Drop your photos or videos here',
     'tag.dropSub': 'one or many · or <u>browse</u> · paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> · JPG, PNG, WebP, MP4, MOV',
     'tag.link': 'Only want to remove the hidden AI tag (Instagram “AI info”)? Open the AI tag remover',
+    'tag.home': 'Back to the Gemini watermark remover (images & videos)',
     'tag.pick': 'Choose files',
     'tag.zip': '⬇ Download all (ZIP)',
     'tag.note': 'Invisible watermarks inside the pixels themselves (like Google SynthID) are not metadata and can’t be removed by this or any tag remover, so some apps may still recognise AI images.',
