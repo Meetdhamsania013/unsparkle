@@ -131,6 +131,8 @@
   // hidden, and every drop or paste on the page comes here.
   if (document.body.dataset.focus === 'tag') {
     document.body.classList.add('tag-page');
+    box.hidden = false;
+    $('tagLink').hidden = true;
     const dz = $('dropzone');
     dz.parentNode.insertBefore(box, dz);
     box.classList.add('tag-solo');

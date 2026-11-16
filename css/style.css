@@ -531,6 +531,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-size: inherit;
 }
 .chip { font-family: inherit; }
+.tag-link {
+  justify-self: center; display: inline-flex; align-items: center; gap: 8px; max-width: 760px; margin-top: -14px;
+  padding: 10px 18px; border-radius: 999px; text-decoration: none; text-align: center; font-weight: 600; font-size: 14px;
+  color: var(--text); background: var(--glass); border: 1px solid var(--line); transition: border-color .2s, transform .2s;
+}
+.tag-link:hover { border-color: var(--cyan); transform: translateY(-1px); }
 .tagtool {
   max-width: 760px; width: 100%; margin: 0 auto; padding: 18px 20px; display: grid; gap: 12px;
   border-radius: var(--radius); background: var(--glass); border: 1px solid var(--line); transition: border-color .2s;
@@ -544,7 +550,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tag-drop-ico { font-size: 40px; line-height: 1; }
 .tagtool.tag-solo { max-width: 820px; padding: 22px; gap: 16px; box-shadow: var(--shadow); }
 .tag-solo .tag-pick { display: none; }
-.tag-solo .tag-text p i { display: none; }
 body.tag-page #dropzone, body.tag-page .features { display: none; }
 .tag-head { display: flex; gap: 14px; align-items: flex-start; }
 .tag-head .f-ico { flex: none; }
