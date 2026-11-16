@@ -324,6 +324,7 @@
     if (state.bg) parts.push(tr('status.bg'));
     else if (state.edited) parts.push(tr('status.edited'));
     if (state.big) parts.push(tr('status.upscaled', { w: state.big.width, h: state.big.height }));
+    if (current && current.tags) parts.push(tr(parts.length ? 'status.tag' : 'status.tagOnly'));
     if (parts.length) setStatus(parts.join('   ·   '), 'ok');
     else setStatus(tr('status.none'), 'warn');
   }
@@ -432,6 +433,9 @@
       item.thumb = makeThumb(cleanCv);
       item.clean = await canvasToBlob(cleanCv, 'image/png');
       item.size = { width: res.image.width, height: res.image.height };
+      // What hidden AI tags the original had. The saved image never has any
+      // (it is re-drawn from pixels), this is only to tell the user.
+      try { item.tags = WMMeta.anyFound((await WMMeta.clean(item.file)).report); } catch (e) { item.tags = false; }
       cleanCv.width = cleanCv.height = 0;
     } catch (e) {
       console.error(e);

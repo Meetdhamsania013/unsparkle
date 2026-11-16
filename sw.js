@@ -4,12 +4,12 @@
  * are cached the first time they're used. Images are never cached or stored.
  * Bump VERSION on every release so visitors get the new files.
  */
-const VERSION = 'unsparkle-v7';
+const VERSION = 'unsparkle-v8';
 const SHELL = [
   './',
   'index.html',
   'css/style.css',
-  'js/i18n.js', 'js/guard.js', 'js/masks.js', 'js/core.js', 'js/work.js', 'js/zip.js',
+  'js/i18n.js', 'js/guard.js', 'js/meta.js', 'js/tagtool.js', 'js/masks.js', 'js/core.js', 'js/work.js', 'js/zip.js',
   'js/upscale.js', 'js/fill.js', 'js/eraser.js', 'js/prefs.js', 'js/app.js', 'js/magic.js',
   'js/vendor/mediabunny.min.js', 'js/video.js', 'js/videoapp.js', 'js/bgremove.js',
   'assets/logo.svg', 'assets/icon-192.png', 'assets/icon-512.png',

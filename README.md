@@ -9,6 +9,7 @@ Remove the corner logo from your AI images and upscale them to HD or 4K. Free, o
 - **One click:** drop an image and the logo is found, removed, and the background restored.
 - **Finds every logo:** scans the corner at every size and position, and also removes a second, older logo left over from an earlier edit.
 - **Video:** removes the Gemini/Veo logo from every frame automatically (logo found on an average of many frames, so no flicker), plus a brush for fixed logos or text. Keeps resolution, frame rate and the original sound. MP4 out (WebM if the browser can't encode MP4).
+- **AI tag remover:** strips the hidden "AI generated" metadata (C2PA Content Credentials, IPTC/XMP `trainedAlgorithmicMedia`, EXIF, MP4 `udta`/`meta`/`uuid` boxes) from JPG, PNG, WebP, MP4 and MOV without re-encoding: pixels and frames stay byte-identical. A separate tool on the start page (and `/remove-ai-label/`), and automatic for everything the watermark remover saves, videos included. Invisible pixel watermarks like SynthID are not metadata and stay.
 - **Background remover:** one click with the ormbg AI (Apache-2.0), then transparent, white, any colour or a blurred background. Transparency survives upscaling.
 - **Social media sizes:** Instagram, Story/Reel/WhatsApp, YouTube thumbnail, Facebook, LinkedIn, X and Pinterest presets, with Fill or Fit and a max file size (1 MB, 500 KB …). Applied on download and in the ZIP.
 - **Batch mode:** drop many images at once. They're cleaned in the background, then **Download all (ZIP)**; click any one to edit it.
@@ -34,7 +35,7 @@ Upscaling loads the onnxruntime-web engine from jsDelivr, so the first upscale n
 
 ## SEO pages
 `node tools/seo-pages.js` builds the landing pages from `index.html`. Each is the full tool with its own title, description, heading, how-to steps, FAQ and structured data:
-`/`, `/gemini-video-watermark-remover/`, `/background-remover/`, `/ai-image-upscaler/`, `/remove-objects-from-photo/`, `/resize-image-for-social-media/`, plus `sitemap.xml` and `robots.txt`.
+`/`, `/gemini-video-watermark-remover/`, `/background-remover/`, `/ai-image-upscaler/`, `/remove-objects-from-photo/`, `/resize-image-for-social-media/`, `/remove-ai-label/`, plus `sitemap.xml` and `robots.txt`.
 Edit the text in `tools/seo-pages.js` and rerun it after changing `index.html`.
 
 ## How it works
@@ -43,6 +44,7 @@ Edit the text in `tools/seo-pages.js` and rerun it after changing `index.html`.
 | Find | `js/core.js` `detect()` | Edge-direction matching of the real logo masks at every size/gap, then checks on equal gaps and realistic opacity |
 | Remove | `js/core.js` `process()` | Median opacity from pixel pairs across the logo edge, exact inverse `(W − α·255)/(1 − α)`, then outline and leftover cleanup. Repeats for extra logos |
 | Erase | `js/eraser.js`, `js/fill.js` | MI-GAN inpainting on a crop around each painted area; PatchMatch fill as fallback |
+| AI tags | `js/meta.js`, `js/tagtool.js` | Lossless removal of C2PA/IPTC/XMP/EXIF blocks (JPEG segments, PNG/WebP chunks, MP4 boxes turned into `free` padding) |
 | Upscale | `js/upscale.js` | Real-ESRGAN `realesr-general-x4v3` (ONNX), tiled with overlap, resized to the target |
 | Background work | `js/work.js` | Runs removal in a Web Worker so the page never freezes |
 | Batch ZIP | `js/zip.js` | Small dependency-free ZIP writer |

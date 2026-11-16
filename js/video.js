@@ -239,13 +239,20 @@
         },
       },
       // audio is copied as-is when the container allows it (no quality loss)
+      // no metadata is carried over: that's where the hidden AI label lives
+      tags: {},
     });
     if (!conversion.isValid) throw new Error('This video format is not supported by your browser.');
     conversion.onProgress = (p) => onProgress && onProgress({ progress: p });
     if (signal) signal.addEventListener('abort', () => conversion.cancel(), { once: true });
     await conversion.execute();
     const buf = output.target.buffer;
-    return { blob: new Blob([buf], { type: mime }), mime, ext };
+    let blob = new Blob([buf], { type: mime });
+    // and anything else that still marks it as AI-made (C2PA, XMP, udta)
+    if (ext === 'mp4' && root.WMMeta) {
+      try { blob = (await root.WMMeta.clean(blob)).blob; } catch (e) { console.warn('metadata clean-up skipped', e); }
+    }
+    return { blob, mime, ext };
   }
 
   root.WMVideo = { supported, analyze, process };

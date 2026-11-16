@@ -5,6 +5,6 @@
   "license": "MIT",
   "description": "Remove the sparkle logo from your AI images and upscale them to HD or 4K, in the browser",
   "scripts": {
-    "test": "node test/core.test.js"
+    "test": "node test/core.test.js && node test/meta.test.js"
   }
 }

@@ -80,6 +80,29 @@
         </div>
       </div>
 
+      <section id="tagTool" class="tagtool" aria-labelledby="tagTitle">
+        <div class="tag-head">
+          <div class="f-ico" aria-hidden="true">🏷</div>
+          <div class="tag-text">
+            <h3 id="tagTitle" data-i18n="tag.title">AI tag remover</h3>
+            <p data-i18n-html="tag.lead"></p>
+          </div>
+          <label class="ghost-btn tag-pick" for="tagInput" data-i18n="tag.pick">Choose files</label>
+          <input id="tagInput" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,.mov,.m4v" multiple hidden />
+        </div>
+        <label id="tagDrop" class="tag-drop" for="tagInput" hidden>
+          <span class="tag-drop-ico" aria-hidden="true">🏷</span>
+          <span class="drop-title" data-i18n="tag.dropTitle">Drop your photos or videos here</span>
+          <span class="drop-sub" data-i18n-html="tag.dropSub"></span>
+        </label>
+        <ul id="tagList" class="tag-list" hidden></ul>
+        <div id="tagActions" class="tag-actions" hidden>
+          <button id="tagZip" class="cta small-cta" data-i18n="tag.zip">⬇ Download all (ZIP)</button>
+          <button id="tagClear" class="ghost-btn" data-i18n="batch.clear">Clear all</button>
+        </div>
+        <p class="hint" data-i18n="tag.note"></p>
+      </section>
+
       <p class="notice">
         <span data-i18n-html="notice"></span>
         <button class="linklike" data-info="fair" data-i18n="link.fair">Fair use</button> · <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button>
@@ -378,7 +401,7 @@
   <div id="toast" class="toast" role="status" hidden></div>
 
   <footer class="foot">
-    <!--seo:tools--><nav class="tools-nav" aria-label="Tools"><a href="./">Gemini watermark remover</a> · <a href="gemini-video-watermark-remover/">Video watermark remover</a> · <span aria-current="page">Background remover</span> · <a href="ai-image-upscaler/">AI image upscaler</a> · <a href="remove-objects-from-photo/">Remove objects from photos</a> · <a href="resize-image-for-social-media/">Resize for social media</a></nav><!--/seo:tools-->
+    <!--seo:tools--><nav class="tools-nav" aria-label="Tools"><a href="./">Gemini watermark remover</a> · <a href="gemini-video-watermark-remover/">Video watermark remover</a> · <span aria-current="page">Background remover</span> · <a href="ai-image-upscaler/">AI image upscaler</a> · <a href="remove-objects-from-photo/">Remove objects from photos</a> · <a href="resize-image-for-social-media/">Resize for social media</a> · <a href="remove-ai-label/">AI tag remover</a></nav><!--/seo:tools-->
     <p>
       <button class="linklike" data-info="privacy" data-i18n="link.privacy">Privacy</button> ·
       <button class="linklike" data-faq data-i18n="link.faq">FAQ</button> ·
@@ -465,6 +488,7 @@
 
   <script src="js/i18n.js"></script>
   <script src="js/guard.js"></script>
+  <script src="js/meta.js"></script>
   <script src="js/masks.js"></script>
   <script src="js/core.js"></script>
   <script src="js/work.js"></script>
@@ -476,6 +500,7 @@
   <script src="js/video.js"></script>
   <script src="js/app.js"></script>
   <script src="js/videoapp.js"></script>
+  <script src="js/tagtool.js"></script>
   <script src="js/prefs.js"></script>
   <script src="js/magic.js"></script>
 </body>

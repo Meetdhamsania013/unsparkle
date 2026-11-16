@@ -144,6 +144,28 @@ const PAGES = [
       ['Is it free and private?', 'Yes. It is free, needs no account, and your images never leave your device.'],
     ],
   },
+  {
+    slug: 'remove-ai-label',
+    focus: 'tag',
+    nav: 'AI tag remover',
+    title: 'Remove “AI Info” Label & C2PA Metadata from Images and Videos – Free | Unsparkle',
+    description: 'Remove the hidden AI-generated tag (C2PA Content Credentials, IPTC and XMP AI metadata) from your photos and videos before posting. Pixels and quality stay the same. Free, private, no upload.',
+    h1: 'Remove the hidden<br /><span class="grad">AI tag.</span>',
+    lead: 'Drop a photo or video on the AI tag remover. The hidden “AI generated” metadata (C2PA Content Credentials, IPTC and XMP AI tags) is removed without changing a single pixel. Gemini images and videos cleaned with the watermark remover get this automatically.',
+    howTitle: 'How to remove the AI tag from an image or video',
+    steps: [
+      ['Drop your file', 'Drop a JPG, PNG, WebP, MP4 or MOV file on the AI tag remover box, or press Choose files. You can add many at once.'],
+      ['See what was found', 'Unsparkle lists the hidden tags it removed, such as C2PA Content Credentials or the IPTC “AI generated” label, and which AI tool wrote them.'],
+      ['Download', 'The cleaned file downloads with the same name, size and quality. Several files can be saved as one ZIP.'],
+    ],
+    faq: [
+      ['What exactly is removed?', 'Metadata: C2PA Content Credentials (JUMBF/caBX/uuid boxes), XMP and IPTC blocks with the trainedAlgorithmicMedia “AI generated” source type, EXIF notes and video metadata boxes. The colour profile and photo rotation are kept.'],
+      ['Does it change the image or video quality?', 'No. Nothing is re-encoded: only the metadata blocks are taken out, so every pixel and every video frame stays exactly the same.'],
+      ['Will Instagram or Facebook still show “AI info”?', 'Those labels are mostly triggered by C2PA and IPTC metadata, which is removed. Invisible watermarks inside the pixels, like Google SynthID, are not metadata and stay, so a platform that checks for them can still recognise the image.'],
+      ['Is my file uploaded?', 'No. Everything happens in your browser, and your files never leave your device.'],
+      ['Does the Gemini watermark remover do this too?', 'Yes. Images and videos saved from the watermark remover never contain any hidden AI tags.'],
+    ],
+  },
 ];
 
 const esc = (t) => String(t).replace(/&(?!amp;|lt;|gt;|quot;|#)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

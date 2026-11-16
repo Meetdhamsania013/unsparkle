@@ -531,6 +531,46 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-size: inherit;
 }
 .chip { font-family: inherit; }
+.tagtool {
+  max-width: 760px; width: 100%; margin: 0 auto; padding: 18px 20px; display: grid; gap: 12px;
+  border-radius: var(--radius); background: var(--glass); border: 1px solid var(--line); transition: border-color .2s;
+}
+.tagtool.drag, .tagtool.tag-focus { border-color: var(--cyan); }
+.tag-drop {
+  display: grid; justify-items: center; gap: 6px; text-align: center; padding: 42px 16px; cursor: pointer;
+  border-radius: 16px; border: 2px dashed var(--line); background: var(--glass-2); transition: border-color .2s, transform .2s;
+}
+.tag-drop:hover, .tagtool.drag .tag-drop { border-color: var(--cyan); transform: translateY(-2px); }
+.tag-drop-ico { font-size: 40px; line-height: 1; }
+.tagtool.tag-solo { max-width: 820px; padding: 22px; gap: 16px; box-shadow: var(--shadow); }
+.tag-solo .tag-pick { display: none; }
+.tag-solo .tag-text p i { display: none; }
+body.tag-page #dropzone, body.tag-page .features { display: none; }
+.tag-head { display: flex; gap: 14px; align-items: flex-start; }
+.tag-head .f-ico { flex: none; }
+.tag-text { flex: 1; min-width: 0; }
+.tag-text h3 { font-size: 17px; margin: 2px 0 4px; }
+.tag-text p { margin: 0; color: var(--muted); font-size: 14px; }
+.tag-pick { flex: none; white-space: nowrap; }
+.tagtool > .hint { margin: 0; font-size: 12.5px; }
+.tag-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tag-row {
+  display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px;
+  background: var(--glass-2); border: 1px solid var(--line);
+}
+.tag-info { flex: 1; min-width: 0; }
+.tag-name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-msg { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.tag-row.ok .tag-msg { color: var(--ok); }
+.tag-row.bad .tag-msg { color: var(--warn); }
+.tag-row .ghost-btn { flex: none; }
+.tag-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .tag-head { flex-wrap: wrap; }
+  .tag-pick { width: 100%; justify-content: center; }
+  .tag-row { flex-wrap: wrap; }
+  .tag-row .ghost-btn { width: 100%; justify-content: center; }
+}
 .blocked {
   display: flex; gap: 14px; align-items: flex-start; max-width: 760px; width: 100%; margin: -12px auto 0; padding: 16px 18px;
   border-radius: 18px; background: color-mix(in srgb, #ef4444 12%, var(--glass)); border: 1px solid color-mix(in srgb, #ef4444 45%, transparent);
